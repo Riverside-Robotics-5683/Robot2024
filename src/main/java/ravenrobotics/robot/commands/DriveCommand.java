@@ -125,9 +125,9 @@ public class DriveCommand extends Command
         }
 
         //Update the filter data on Shuffleboard.
-        xAxisFilterEntry.setDouble(xLimiter.calculate(xSpeed.getAsDouble()));
-        yAxisFilterEntry.setDouble(yLimiter.calculate(ySpeed.getAsDouble()));
-        zAxisFilterEntry.setDouble(tLimiter.calculate(tSpeed.getAsDouble()));
+        xAxisFilterEntry.setDouble(xLimiter.lastValue());
+        yAxisFilterEntry.setDouble(yLimiter.lastValue());
+        zAxisFilterEntry.setDouble(tLimiter.lastValue());
 
         //Convert the target speeds to a chassis speed.
         ChassisSpeeds targetSpeeds = new ChassisSpeeds(xSpeedMPS, ySpeedMPS, tSpeedMPS);
