@@ -42,6 +42,7 @@ public class FlywheelSubsystem extends SubsystemBase
         //If the instance hasn't been created it yet, create it.
         if (instance == null)
         {
+            System.out.println("Creating FlywheelSubsystem object.");
             instance = new FlywheelSubsystem();
         }
             

@@ -11,9 +11,12 @@ import com.revrobotics.Rev2mDistanceSensor.Port;
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import ravenrobotics.robot.Robot;
+import ravenrobotics.robot.RobotContainer;
 import ravenrobotics.robot.Constants.IntakeConstants;
 import ravenrobotics.robot.util.Telemetry;
 
@@ -84,6 +87,7 @@ public class IntakeSubsystem extends SubsystemBase
         //If the instance hasn't been created it yet, create it.
         if (instance == null)
         {
+            System.out.println("Creating IntakeSubsystem instance");
             instance = new IntakeSubsystem();
         }
         
@@ -163,7 +167,10 @@ public class IntakeSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
-        System.out.println("Arm Position: " + armMotorEncoder.getPosition());
+        if(DriverStation.isEnabled())
+        {
+            System.out.println("Arm Position: " + armMotorEncoder.getPosition());
+        }
         //Update arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
     }

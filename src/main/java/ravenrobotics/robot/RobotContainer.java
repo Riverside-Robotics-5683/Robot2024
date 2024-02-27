@@ -38,8 +38,8 @@ public class RobotContainer
 
   //Main drive command.
   private final DriveCommand driveCommand = new DriveCommand(
-    () -> -driverJoystick.getX(),
     () -> -driverJoystick.getY(),
+    () -> -driverJoystick.getX(),
     () -> -driverJoystick.getZ(),
     () -> -driverJoystick.getThrottle(),
     () -> isFieldRelative);

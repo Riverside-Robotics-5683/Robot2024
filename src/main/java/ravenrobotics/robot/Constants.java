@@ -25,10 +25,10 @@ public class Constants
         /////////////////////
         ////Invert Motors////
         ////////////////////
-        public static final boolean kInvertFrontLeftSide = false;
+        public static final boolean kInvertFrontLeftSide = true;
         public static final boolean kInvertFrontRightSide = false;
         public static final boolean kInvertBackLeftSide = true;
-        public static final boolean kInvertBackRightSide = true;
+        public static final boolean kInvertBackRightSide = false;
         /////////////////////
         /////Max Voltage/////
         /////////////////////
@@ -46,7 +46,8 @@ public class Constants
         //Encoder Constants//
         /////////////////////
         public static final double kWheelDiameter = Units.inchesToMeters(6);
-        public static final double kEncoderConversionFactor = Math.PI * kWheelDiameter;
+        public static final double kEncoderDistanceConversionFactor = Math.PI * kWheelDiameter * (12 / 72);
+        public static final double kEncoderVelocityConversionFactor = 12 / 72;
     }
     //Constants for the Pigeon2 IMU, such as the ID and various configuration settings.
     public static class IMUConstants
@@ -103,12 +104,13 @@ public class Constants
     public static class KinematicsConstants
     {
         //Offset from the center of the robot to a wheel.
-        public static final double kOffset = Units.inchesToMeters(30) / 2;
+        public static final double kFrontOffset = Units.inchesToMeters(14.838) / 2;
+        public static final double kBackOffset = Units.inchesToMeters(14.547) / 2;
         //Translation2d offsets for each wheel.
-        public static final Translation2d kFrontLeftOffset = new Translation2d(kOffset, kOffset);
-        public static final Translation2d kFrontRightOffset = new Translation2d(kOffset, -kOffset);
-        public static final Translation2d kBackLeftOffset = new Translation2d(-kOffset, kOffset);
-        public static final Translation2d kBackRightOffset = new Translation2d(-kOffset, -kOffset);
+        public static final Translation2d kFrontLeftOffset = new Translation2d(kFrontOffset, kFrontOffset);
+        public static final Translation2d kFrontRightOffset = new Translation2d(kFrontOffset, -kFrontOffset);
+        public static final Translation2d kBackLeftOffset = new Translation2d(-kBackOffset, kBackOffset);
+        public static final Translation2d kBackRightOffset = new Translation2d(-kBackOffset, -kBackOffset);
         //Actual kinematics object for performing calculations.
         public static final MecanumDriveKinematics kDriveKinematics = new MecanumDriveKinematics(
             kFrontLeftOffset,
