@@ -201,9 +201,8 @@ public class DriveSubsystem extends SubsystemBase
      * Drive the drivetrain.
      * 
      * @param speeds The target speed of the drivetrain as a ChassisSpeeds object.
-     * @param maxSpeed The current maximum speed of the drivetrain.
      */
-    public void drive(ChassisSpeeds speeds, double maxSpeed)
+    public void drive(ChassisSpeeds speeds)
     {
         //Debugging
         //System.out.println("Chassis Speeds: " + speeds);
@@ -211,50 +210,21 @@ public class DriveSubsystem extends SubsystemBase
         //If we are primarliy rotating instead of driving, do a differential drive rotation.
         if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && Math.abs(speeds.omegaRadiansPerSecond) > 0)
         {
-            frontLeft.set(-speeds.omegaRadiansPerSecond / maxSpeed);
-            frontRight.set(speeds.omegaRadiansPerSecond / maxSpeed);
-            backLeft.set(-speeds.omegaRadiansPerSecond / maxSpeed);
-            backRight.set(speeds.omegaRadiansPerSecond / maxSpeed);
+            frontLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+            frontRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+            backLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+            backRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
             return;
         }
 
         //Convert the ChassisSpeeds to individual wheel speeds.
         MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
-        wheelSpeeds.desaturate(maxSpeed);
+        wheelSpeeds.desaturate(DrivetrainConstants.kDriveMaxSpeedMPS);
 
         //Debugging
         //System.out.println("Wheel Speeds: " + wheelSpeeds);
         
         //Convert the speeds into the range for the motors, then set them.
-        frontLeft.set((wheelSpeeds.frontLeftMetersPerSecond / maxSpeed) * DrivetrainConstants.kDriveMaxSpeedMPS);
-        frontRight.set((wheelSpeeds.frontRightMetersPerSecond / maxSpeed) * DrivetrainConstants.kDriveMaxSpeedMPS);
-        backLeft.set((wheelSpeeds.rearLeftMetersPerSecond / maxSpeed) * DrivetrainConstants.kDriveMaxSpeedMPS);
-        backRight.set((wheelSpeeds.rearRightMetersPerSecond / maxSpeed) * DrivetrainConstants.kDriveMaxSpeedMPS);
-
-        //Update Shuffleboard with all the target speeds.
-        frontLeftTargetSpeed.setDouble(wheelSpeeds.frontLeftMetersPerSecond);
-        frontRightTargetSpeed.setDouble(wheelSpeeds.frontRightMetersPerSecond);
-        backLeftTargetSpeed.setDouble(wheelSpeeds.rearLeftMetersPerSecond);
-        backRightTargetSpeed.setDouble(wheelSpeeds.rearRightMetersPerSecond);
-        //Update Shuffleboard with powers.
-        frontLeftPower.setDouble(frontLeft.get());
-        frontRightPower.setDouble(frontRight.get());
-        backLeftPower.setDouble(backLeft.get());
-        backRightPower.setDouble(backRight.get());
-    }
-
-    /**
-     * Drive the drivetrain.
-     * 
-     * @param speeds The target speeds of the drivetrain as a ChassisSpeeds object.
-     */
-    public void drive(ChassisSpeeds speeds)
-    {
-        //Convert the chassis speeds to wheel speeds and make sure they aren't overshooting our max speed we can actually drive.
-        MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
-        wheelSpeeds.desaturate(DrivetrainConstants.kDriveMaxSpeedMPS);
-
-        //Set the motors to the speeds.
         frontLeft.set(wheelSpeeds.frontLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         frontRight.set(wheelSpeeds.frontRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);

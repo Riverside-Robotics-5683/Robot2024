@@ -41,7 +41,6 @@ public class RobotContainer
     () -> -driverJoystick.getY(),
     () -> -driverJoystick.getX(),
     () -> -driverJoystick.getZ(),
-    () -> -driverJoystick.getThrottle(),
     () -> isFieldRelative);
 
   public RobotContainer()
