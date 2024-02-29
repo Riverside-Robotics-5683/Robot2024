@@ -76,11 +76,11 @@ public class Constants
         public static final int kRollerMotor = 6;
         public static final int kArmMotor = 7;
         //PID Constants for the arm.
-        public static final double kArmP = 1.5;
+        public static final double kArmP = 1.0;
         public static final double kArmI = 0.0;
         public static final double kArmD = 0.5;
         
-        public static final double kArmDeployedSetpoint = 57;
+        public static final double kArmDeployedSetpoint = 57.2;
 
         public static final double kRollerFF = 1.0;
         public static final double kRollerSetpoint = 4000;
@@ -114,7 +114,7 @@ public class Constants
         //Actual kinematics object for performing calculations.
         public static final MecanumDriveKinematics kDriveKinematics = new MecanumDriveKinematics(
             kFrontLeftOffset,
-            kFrontRightOffset,
+            kFrontRightOffset, 
             kBackLeftOffset,
             kBackRightOffset);
     }

@@ -4,8 +4,10 @@
 
 package ravenrobotics.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -36,6 +38,10 @@ public class RobotContainer
 
   private final SendableChooser<Command> teleopModeChooser = new SendableChooser<Command>();
 
+  private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
+
+  private SendableChooser<Command> autoChooser;
+
   //Main drive command.
   private final DriveCommand driveCommand = new DriveCommand(
     () -> -driverJoystick.getY(),
@@ -49,6 +55,11 @@ public class RobotContainer
     teleopModeChooser.addOption("Drive", driveCommand);
     //Put the TeleOp mode chooser on the dashboard.
     Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
+
+    //autoChooser = AutoBuilder.buildAutoChooser();
+
+    //Telemetry.teleopTab.add("Auto Chooser", autoChooser);
+
     //Configure configured controller bindings.
     configureBindings();
     DriveSubsystem.getInstance().setDefaultCommand(driveCommand);
@@ -57,28 +68,32 @@ public class RobotContainer
   private void configureBindings()
   {
     // Shooting: parallel command to run intake rollers and flywheel while trigger held 
-    driverJoystick.button(1).whileTrue(new RunFlywheelCommand());
+    // driverJoystick.button(1).whileTrue(new RunFlywheelCommand());
 
 
     //Set the buttons on the joystick for field-relative and zeroing the heading.
     driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
-    driverJoystick.button(3).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
+    driverJoystick.button(6).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
-    driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
-    driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
-    driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
+    // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
+    // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
+    // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
+    // driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
 
-    driverJoystick.button(5).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
-    driverJoystick.button(4).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
+    // driverJoystick.button(5).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
+    // driverJoystick.button(4).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
 
-    driverJoystick.button(6).toggleOnTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().intakeRunRollers()));
-    driverJoystick.button(6).toggleOnFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
-    //systemsController.y().toggleOnTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().runRollers()));
-    //systemsController.y().toggleOnFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
+    // driverJoystick.button(3).toggleOnTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().intakeRunRollers()));
+    // driverJoystick.button(3).toggleOnFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
+    
+    systemsController.x().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
+    systemsController.b().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
 
-    //systemsController.back().toggleOnTrue(new InstantCommand(() -> FlywheelSubsystem.getInstance().override()));
-   // systemsController.back().toggleOnFalse(new InstantCommand(() -> FlywheelSubsystem.getInstance().unOverride()));
+    systemsController.leftTrigger().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().intakeRunRollers()));
+    systemsController.leftTrigger().onFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
+
+    systemsController.rightTrigger().onTrue(flywheelCommand);
+    systemsController.rightTrigger().onFalse(new InstantCommand(() -> flywheelCommand.cancel()));
   }
 
   public void setupTeleopCommand()
@@ -108,6 +123,6 @@ public class RobotContainer
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return autoChooser.getSelected();
   }
 }

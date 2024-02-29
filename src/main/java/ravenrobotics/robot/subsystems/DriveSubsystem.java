@@ -208,14 +208,14 @@ public class DriveSubsystem extends SubsystemBase
         //System.out.println("Chassis Speeds: " + speeds);
 
         //If we are primarliy rotating instead of driving, do a differential drive rotation.
-        if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && Math.abs(speeds.omegaRadiansPerSecond) > 0)
-        {
-            frontLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-            frontRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-            backLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-            backRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-            return;
-        }
+        // if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && Math.abs(speeds.omegaRadiansPerSecond) > 0)
+        // {
+        //     frontLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     frontRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     backLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     backRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     return;
+        // }
 
         //Convert the ChassisSpeeds to individual wheel speeds.
         MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
