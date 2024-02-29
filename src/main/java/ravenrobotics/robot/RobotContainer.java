@@ -56,7 +56,9 @@ public class RobotContainer
     //Put the TeleOp mode chooser on the dashboard.
     Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
 
-    //autoChooser = AutoBuilder.buildAutoChooser();
+    DriveSubsystem.getInstance().configPathPlanner();
+
+    autoChooser = AutoBuilder.buildAutoChooser();
 
     //Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 

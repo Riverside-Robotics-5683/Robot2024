@@ -155,8 +155,10 @@ public class DriveSubsystem extends SubsystemBase
         
         //Add the Field2d widget to Shuffleboard so we can see the robot's position.
         Telemetry.teleopTab.add("Robot Position", fieldData);
+    }
 
-        //Configure PathPlanner's AutoBuilder for use.
+    public void configPathPlanner()
+    {
         AutoBuilder.configureHolonomic(
             //Gives the robot pose as a Pose2d.
             this::getRobotPose,
