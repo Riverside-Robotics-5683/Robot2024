@@ -131,6 +131,7 @@ public class DriveSubsystem extends SubsystemBase
         //If the instance doesn't exist yet, create it.
         if (instance == null)
         {
+            System.out.println("Creating DriveSubsystem instance.");
             instance = new DriveSubsystem();
         }
         //Return the instance.
@@ -154,8 +155,10 @@ public class DriveSubsystem extends SubsystemBase
         
         //Add the Field2d widget to Shuffleboard so we can see the robot's position.
         Telemetry.teleopTab.add("Robot Position", fieldData);
+    }
 
-        //Configure PathPlanner's AutoBuilder for use.
+    public void configPathPlanner()
+    {
         AutoBuilder.configureHolonomic(
             //Gives the robot pose as a Pose2d.
             this::getRobotPose,
@@ -200,55 +203,30 @@ public class DriveSubsystem extends SubsystemBase
      * Drive the drivetrain.
      * 
      * @param speeds The target speed of the drivetrain as a ChassisSpeeds object.
-     * @param maxSpeed The current maximum speed of the drivetrain.
-     */
-    public void drive(ChassisSpeeds speeds, double maxSpeed)
-    {
-        System.out.println("Chassis Speeds: " + speeds);
-        //If we are primarliy rotating instead of driving, do a differential drive rotation.
-        if (Math.abs(speeds.omegaRadiansPerSecond) > speeds.vxMetersPerSecond && Math.abs(speeds.omegaRadiansPerSecond) > speeds.vyMetersPerSecond)
-        {
-            frontLeft.set(speeds.omegaRadiansPerSecond / maxSpeed);
-            frontRight.set(speeds.omegaRadiansPerSecond / maxSpeed);
-            backLeft.set(-speeds.omegaRadiansPerSecond / maxSpeed);
-            backRight.set(-speeds.omegaRadiansPerSecond / maxSpeed);
-            return;
-        }
-
-        //Convert the ChassisSpeeds to individual wheel speeds.
-        MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
-        wheelSpeeds.desaturate(maxSpeed);
-        
-        //Convert the speeds into the range for the motors, then set them.
-        frontLeft.set(wheelSpeeds.frontLeftMetersPerSecond / maxSpeed);
-        frontRight.set(wheelSpeeds.frontRightMetersPerSecond / maxSpeed);
-        backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / maxSpeed);
-        backRight.set(wheelSpeeds.rearRightMetersPerSecond / maxSpeed);
-
-        //Update Shuffleboard with all the target speeds.
-        frontLeftTargetSpeed.setDouble(wheelSpeeds.frontLeftMetersPerSecond);
-        frontRightTargetSpeed.setDouble(wheelSpeeds.frontRightMetersPerSecond);
-        backLeftTargetSpeed.setDouble(wheelSpeeds.rearLeftMetersPerSecond);
-        backRightTargetSpeed.setDouble(wheelSpeeds.rearRightMetersPerSecond);
-        //Update Shuffleboard with powers.
-        frontLeftPower.setDouble(frontLeft.get());
-        frontRightPower.setDouble(frontRight.get());
-        backLeftPower.setDouble(backLeft.get());
-        backRightPower.setDouble(backRight.get());
-    }
-
-    /**
-     * Drive the drivetrain.
-     * 
-     * @param speeds The target speeds of the drivetrain as a ChassisSpeeds object.
      */
     public void drive(ChassisSpeeds speeds)
     {
-        //Convert the chassis speeds to wheel speeds and make sure they aren't overshooting our max speed we can actually drive.
+        //Debugging
+        //System.out.println("Chassis Speeds: " + speeds);
+
+        //If we are primarliy rotating instead of driving, do a differential drive rotation.
+        // if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && Math.abs(speeds.omegaRadiansPerSecond) > 0)
+        // {
+        //     frontLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     frontRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     backLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     backRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+        //     return;
+        // }
+
+        //Convert the ChassisSpeeds to individual wheel speeds.
         MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
         wheelSpeeds.desaturate(DrivetrainConstants.kDriveMaxSpeedMPS);
 
-        //Set the motors to the speeds.
+        //Debugging
+        //System.out.println("Wheel Speeds: " + wheelSpeeds);
+        
+        //Convert the speeds into the range for the motors, then set them.
         frontLeft.set(wheelSpeeds.frontLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         frontRight.set(wheelSpeeds.frontRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
@@ -402,7 +380,7 @@ public class DriveSubsystem extends SubsystemBase
         backLeft.restoreFactoryDefaults();
         backRight.restoreFactoryDefaults();
 
-        //Reverse the default direction of the left side so everything drives normally.
+        //Reverse the default direction of the back side so everything drives normally.
         frontLeft.setInverted(DrivetrainConstants.kInvertFrontLeftSide);
         backLeft.setInverted(DrivetrainConstants.kInvertBackLeftSide);
         frontRight.setInverted(DrivetrainConstants.kInvertFrontRightSide);
@@ -430,15 +408,15 @@ public class DriveSubsystem extends SubsystemBase
         backRightEncoder.setPosition(0.0);
 
         //Sets the velocity conversion factor to give us m/s.
-        frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
-        frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
-        backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
-        backRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
+        frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
+        backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
+        backRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
         //Sets the position factor to give us accurate distance measurements.
-        frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
-        frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
-        backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
-        backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
+        frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
+        backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
+        backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
 
         //Initialize odometry since encoders are ready.
         driveOdometry = new MecanumDriveOdometry(

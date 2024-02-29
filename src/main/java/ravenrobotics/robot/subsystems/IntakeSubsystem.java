@@ -9,9 +9,8 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.Rev2mDistanceSensor.Port;
 
-import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.robot.Constants.IntakeConstants;
@@ -28,9 +27,6 @@ public class IntakeSubsystem extends SubsystemBase
 
     //PID Controller for the arm.
     private final SparkPIDController armPIDController = armMotor.getPIDController();
-    //Controllers for the rollers.
-    private final BangBangController rollerBBController = new BangBangController();
-    private final SparkPIDController rollerPIDController = rollerMotor.getPIDController();
 
     //Distance sensor.
     //private final Rev2mDistanceSensor distanceSensor = new Rev2mDistanceSensor(Port.kOnboard);
@@ -84,6 +80,7 @@ public class IntakeSubsystem extends SubsystemBase
         //If the instance hasn't been created it yet, create it.
         if (instance == null)
         {
+            System.out.println("Creating IntakeSubsystem instance");
             instance = new IntakeSubsystem();
         }
         
@@ -139,7 +136,7 @@ public class IntakeSubsystem extends SubsystemBase
 
     public void intakeRunRollers()
     {
-        rollerMotor.set(-1);
+        rollerMotor.set(-0.5);
     }
 
     public void runRollersSlow()
@@ -163,7 +160,10 @@ public class IntakeSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
-        System.out.println("Arm Position: " + armMotorEncoder.getPosition());
+        if(DriverStation.isEnabled())
+        {
+            //System.out.println("Arm Position: " + armMotorEncoder.getPosition());
+        }
         //Update arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
     }

@@ -20,14 +20,12 @@ public class DriveCommand extends Command
     private final IMUSubsystem imuSubsystem;
     
     //Suppliers for joystick values and whether to drive field relative.
-    private final DoubleSupplier xSpeed, ySpeed, tSpeed, maxSpeed;
+    private final DoubleSupplier xSpeed, ySpeed, tSpeed;
     private final BooleanSupplier isFieldRelative;
 
     //Limiters so we don't break the chassis by instantly applying power.
     private final SlewRateLimiter xLimiter, yLimiter, tLimiter;
 
-    //Max speed entry.
-    private final GenericEntry maxSpeedEntry = Telemetry.teleopTab.add("Max Speed", DrivetrainConstants.kDriveMaxSpeedMPS * 0.1).getEntry();
     //Axis entries.
     private final GenericEntry xAxisEntry = Telemetry.teleopTab.add("X Axis", 0).getEntry();
     private final GenericEntry yAxisEntry = Telemetry.teleopTab.add("Y Axis", 0).getEntry();
@@ -40,23 +38,21 @@ public class DriveCommand extends Command
     /**
      * Command to drive the robot using joystick axes.
      * 
-     * @param strafeSpeed The axis for moving left/right.
      * @param forwardSpeed The axis for moving forward/backward.
+     * @param strafeSpeed The axis for moving left/right.
      * @param rotationSpeed The axis for rotating.
-     * @param maxSpeed The axis for controlling the max speed of the robot.
      * @param isFieldRelative The boolean for whether to drive field relative.
      */
-    public DriveCommand(DoubleSupplier strafeSpeed, DoubleSupplier forwardSpeed, DoubleSupplier rotationSpeed, DoubleSupplier maxSpeed, BooleanSupplier isFieldRelative)
+    public DriveCommand(DoubleSupplier forwardSpeed, DoubleSupplier strafeSpeed, DoubleSupplier rotationSpeed, BooleanSupplier isFieldRelative)
     {
         //Initialize subsystem instances.
         this.driveSubsystem = DriveSubsystem.getInstance();
         this.imuSubsystem = IMUSubsystem.getInstance();
 
         //Initialize double suppliers (getting joystick values)
-        this.xSpeed = strafeSpeed;
-        this.ySpeed = forwardSpeed;
+        this.xSpeed = forwardSpeed;
+        this.ySpeed = strafeSpeed;
         this.tSpeed = rotationSpeed;
-        this.maxSpeed = maxSpeed;
 
         //Initialize boolean supplier (whether to drive field or robot relative)
         this.isFieldRelative = isFieldRelative;
@@ -80,45 +76,31 @@ public class DriveCommand extends Command
     public void execute()
     {
         //Temporary variables for the speeds.
-        double xSpeedMPS, ySpeedMPS, tSpeedMPS, mSpeed;
+        double xSpeedMPS, ySpeedMPS, tSpeedMPS;
 
         //Update the axis data on Shuffleboard.
         xAxisEntry.setDouble(xSpeed.getAsDouble());
         yAxisEntry.setDouble(ySpeed.getAsDouble());
         zAxisEntry.setDouble(tSpeed.getAsDouble());
 
-        //Convert the maxSpeed axis to a range of 0-1.
-        mSpeed = (maxSpeed.getAsDouble() + 1) * 0.5;
-        if (mSpeed < 0.1)
-        {
-            mSpeed = 0.1;
-        }
-
-
-        //Update the max speed on Shuffleboard as a percentage.
-        maxSpeedEntry.setDouble(mSpeed * 100);
-
-        //Conver the max speed to a speed in meters per second.
-        mSpeed *= DrivetrainConstants.kDriveMaxSpeedMPS;
-
         //Get the target strafe, forward/backward, and rotation speeds.
-        xSpeedMPS = xLimiter.calculate(xSpeed.getAsDouble()) * mSpeed;
-        ySpeedMPS = yLimiter.calculate(ySpeed.getAsDouble()) * mSpeed;
-        tSpeedMPS = tLimiter.calculate(tSpeed.getAsDouble()) * mSpeed;
+        xSpeedMPS = xLimiter.calculate(xSpeed.getAsDouble()) * DrivetrainConstants.kDriveMaxSpeedMPS;
+        ySpeedMPS = yLimiter.calculate(ySpeed.getAsDouble()) * DrivetrainConstants.kDriveMaxSpeedMPS;
+        tSpeedMPS = tLimiter.calculate(tSpeed.getAsDouble()) * DrivetrainConstants.kDriveMaxSpeedMPS;
 
-        if (Math.abs(xSpeed.getAsDouble()) < 0.03)
+        if (Math.abs(xSpeed.getAsDouble()) < 0.1)
         {
             xLimiter.reset(0);
             xSpeedMPS = 0;
         }
         
-        if (Math.abs(ySpeed.getAsDouble()) < 0.03)
+        if (Math.abs(ySpeed.getAsDouble()) < 0.1)
         {
             yLimiter.reset(0);
             ySpeedMPS = 0;
         }
 
-        if (Math.abs(tSpeed.getAsDouble()) < 0.01)
+        if (Math.abs(tSpeed.getAsDouble()) < 0.1)
         {
             tLimiter.reset(0);
             tSpeedMPS = 0;
@@ -138,6 +120,6 @@ public class DriveCommand extends Command
             targetSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(targetSpeeds, imuSubsystem.getYaw());
         }
         //Drive the subsystem.
-        driveSubsystem.drive(targetSpeeds, mSpeed);
+        driveSubsystem.drive(targetSpeeds);
     }
 }

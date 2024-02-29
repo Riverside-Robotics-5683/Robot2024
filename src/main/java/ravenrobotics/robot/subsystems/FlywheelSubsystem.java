@@ -6,7 +6,6 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.robot.Constants.FlywheelConstants;
 
@@ -42,6 +41,7 @@ public class FlywheelSubsystem extends SubsystemBase
         //If the instance hasn't been created it yet, create it.
         if (instance == null)
         {
+            System.out.println("Creating FlywheelSubsystem object.");
             instance = new FlywheelSubsystem();
         }
             
