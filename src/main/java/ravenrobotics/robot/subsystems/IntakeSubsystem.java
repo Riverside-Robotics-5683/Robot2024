@@ -13,8 +13,6 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Robot;
-import ravenrobotics.robot.RobotContainer;
 import ravenrobotics.robot.Constants.IntakeConstants;
 import ravenrobotics.robot.util.Telemetry;
 
