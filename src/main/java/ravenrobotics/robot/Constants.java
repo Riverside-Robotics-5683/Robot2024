@@ -100,6 +100,15 @@ public class Constants
         public static final double kSetPoint = 3000;
     }
 
+    public static class ClimberConstants
+    {
+        public static final int kLeftClimber = 10;
+        public static final int kRightClimber = 11;
+
+        public static final boolean kInvertLeftSide = true;
+        public static final boolean kInvertRightSide = false;
+    }
+
     //Constants for kinematics.
     public static class KinematicsConstants
     {
