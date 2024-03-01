@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import ravenrobotics.robot.Constants.DriverStationConstants;
 import ravenrobotics.robot.commands.DriveCommand;
 import ravenrobotics.robot.commands.RunFlywheelCommand;
+import ravenrobotics.robot.commands.autos.DriveForwardAuto;
 import ravenrobotics.robot.subsystems.DriveSubsystem;
 import ravenrobotics.robot.subsystems.FlywheelSubsystem;
 import ravenrobotics.robot.subsystems.IMUSubsystem;
@@ -60,7 +61,9 @@ public class RobotContainer
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
-    //Telemetry.teleopTab.add("Auto Chooser", autoChooser);
+    autoChooser.addOption("Drive Forward", new DriveForwardAuto());
+
+    Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 
     //Configure configured controller bindings.
     configureBindings();
@@ -77,10 +80,10 @@ public class RobotContainer
     driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
     driverJoystick.button(6).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
-    // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
-    // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
-    // driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
+    driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
+    driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
+    driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
+    driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
 
     // driverJoystick.button(5).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
     // driverJoystick.button(4).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));

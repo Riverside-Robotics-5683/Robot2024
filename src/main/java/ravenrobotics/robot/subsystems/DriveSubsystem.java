@@ -294,8 +294,13 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void resetRobotPose(Pose2d newPose)
     {
+        frontLeftEncoder.setPosition(0);
+        frontRightEncoder.setPosition(0);
+        backLeftEncoder.setPosition(0);
+        backRightEncoder.setPosition(0);
+
         drivetrainPose = newPose;
-        driveOdometry.resetPosition(newPose.getRotation(), new MecanumDriveWheelPositions(), newPose);
+        driveOdometry.resetPosition(newPose.getRotation(), getWheelPositions(), newPose);
     }
 
     /**
