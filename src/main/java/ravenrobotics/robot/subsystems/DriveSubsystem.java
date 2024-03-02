@@ -9,7 +9,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
@@ -19,7 +18,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Measure;
@@ -28,13 +26,11 @@ import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import ravenrobotics.robot.AutoConstants;
-import ravenrobotics.robot.Robot;
 import ravenrobotics.robot.Constants.DrivetrainConstants;
 import ravenrobotics.robot.Constants.KinematicsConstants;
 import ravenrobotics.robot.util.Telemetry;
@@ -146,16 +142,18 @@ public class DriveSubsystem extends SubsystemBase
         //Configure the motors and encoders for use.
         configMotors();
 
-        //Setup for simulation
-        if(Robot.isSimulation())
-        {
-            addMotorsToSim();
-        }
+        //Initialize odometry for use.
+        driveOdometry = new MecanumDriveOdometry(KinematicsConstants.kDriveKinematics,
+        IMUSubsystem.getInstance().getYaw(),
+        getWheelPositions());
 
         //Add the Field2d widget to Shuffleboard so we can see the robot's position.
         Telemetry.teleopTab.add("Robot Position", fieldData);
     }
 
+    /**
+     * Configures PathPlanner to use the drivetrain.
+     */
     public void configPathPlanner()
     {
         AutoBuilder.configureHolonomic(
@@ -198,13 +196,6 @@ public class DriveSubsystem extends SubsystemBase
         );
     }
 
-    public void setupOdometry()
-    {
-        driveOdometry = new MecanumDriveOdometry(KinematicsConstants.kDriveKinematics,
-        IMUSubsystem.getInstance().getYaw(),
-        getWheelPositions());
-    }
-
     /**
      * Drive the drivetrain.
      * 
@@ -214,16 +205,6 @@ public class DriveSubsystem extends SubsystemBase
     {
         //Debugging
         //System.out.println("Chassis Speeds: " + speeds);
-
-        //If we are primarliy rotating instead of driving, do a differential drive rotation.
-        // if (speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && Math.abs(speeds.omegaRadiansPerSecond) > 0)
-        // {
-        //     frontLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-        //     frontRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-        //     backLeft.set(-speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-        //     backRight.set(speeds.omegaRadiansPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
-        //     return;
-        // }
 
         //Convert the ChassisSpeeds to individual wheel speeds.
         MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
@@ -259,10 +240,10 @@ public class DriveSubsystem extends SubsystemBase
     {
         //Create a MecanumDriveWheelSpeeds object from the encoder speeds.
         var speeds = new MecanumDriveWheelSpeeds(
-            frontLeftEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor,
-            frontRightEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor,
-            backLeftEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor,
-            backRightEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor
+            frontLeftEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor,
+            frontRightEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor,
+            backLeftEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor,
+            backRightEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor
         );
 
         return KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
@@ -276,10 +257,10 @@ public class DriveSubsystem extends SubsystemBase
     public MecanumDriveWheelPositions getWheelPositions()
     {
         return new MecanumDriveWheelPositions(
-            frontLeftEncoder.getPosition() / DrivetrainConstants.kEncoderDistanceConversionFactor,
-            frontRightEncoder.getPosition() / DrivetrainConstants.kEncoderDistanceConversionFactor,
-            backLeftEncoder.getPosition()  / DrivetrainConstants.kEncoderDistanceConversionFactor,
-            backRightEncoder.getPosition() / DrivetrainConstants.kEncoderDistanceConversionFactor
+            frontLeftEncoder.getPosition() / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor,
+            frontRightEncoder.getPosition() / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor,
+            backLeftEncoder.getPosition()  / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor,
+            backRightEncoder.getPosition() / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor
         );
     }
 
@@ -356,28 +337,6 @@ public class DriveSubsystem extends SubsystemBase
 
         //Update the robot pose on the field widget.
         fieldData.setRobotPose(drivetrainPose);
-    }
-
-    @Override
-    public void simulationPeriodic()
-    {
-        //Update the BatterySim battery.
-        BatterySim.calculateDefaultBatteryLoadedVoltage(
-            frontLeft.get() * DrivetrainConstants.kDriveMaxVoltage,
-            frontRight.get() * DrivetrainConstants.kDriveMaxVoltage,
-            backLeft.get() * DrivetrainConstants.kDriveMaxVoltage,
-            backRight.get() * DrivetrainConstants.kDriveMaxVoltage);
-    }
-
-    /**
-     * Add the motors to the simulation (WIP).
-     */
-    public void addMotorsToSim()
-    {
-        REVPhysicsSim.getInstance().addSparkMax(frontLeft, DCMotor.getNEO(1));
-        REVPhysicsSim.getInstance().addSparkMax(frontRight, DCMotor.getNEO(1));
-        REVPhysicsSim.getInstance().addSparkMax(backLeft, DCMotor.getNEO(1));
-        REVPhysicsSim.getInstance().addSparkMax(backLeft, DCMotor.getNEO(1));
     }
 
     /**

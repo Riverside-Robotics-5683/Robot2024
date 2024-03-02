@@ -61,6 +61,17 @@ public class IMUSubsystem extends SubsystemBase
     }
 
     /**
+     * Get the current acceleration on the X-axis from the IMU.
+     * 
+     * @return The acceleration in Gs as a double.
+     */
+    public double getXSpeed()
+    {
+        var speed = imu.getAccelerationY().refresh().getValueAsDouble();
+        return speed;
+    }
+
+    /**
      * Set the heading of the IMU to zero.
      */
     public void zeroYaw()

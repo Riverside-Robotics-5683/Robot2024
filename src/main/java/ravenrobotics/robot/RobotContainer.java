@@ -5,6 +5,7 @@
 package ravenrobotics.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -17,6 +18,7 @@ import ravenrobotics.robot.Constants.DriverStationConstants;
 import ravenrobotics.robot.commands.DriveCommand;
 import ravenrobotics.robot.commands.RunFlywheelCommand;
 import ravenrobotics.robot.commands.autos.DriveForwardAuto;
+import ravenrobotics.robot.commands.autos.ppcommands.*;
 import ravenrobotics.robot.subsystems.ClimberSubsystem;
 import ravenrobotics.robot.subsystems.DriveSubsystem;
 import ravenrobotics.robot.subsystems.IMUSubsystem;
@@ -56,7 +58,9 @@ public class RobotContainer
     Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
 
     DriveSubsystem.getInstance().configPathPlanner();
-    DriveSubsystem.getInstance().setupOdometry();
+
+    NamedCommands.registerCommand("lineUpSpeaker", new LineUpWithSpeakerCommand());
+    NamedCommands.registerCommand("shootNote", new AutoShootCommand());
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
