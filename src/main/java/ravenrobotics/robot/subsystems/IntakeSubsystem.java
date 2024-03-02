@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.Rev2mDistanceSensor.Port;
+import com.revrobotics.Rev2mDistanceSensor.Unit;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -29,10 +30,12 @@ public class IntakeSubsystem extends SubsystemBase
     private final SparkPIDController armPIDController = armMotor.getPIDController();
 
     //Distance sensor.
-    //private final Rev2mDistanceSensor distanceSensor = new Rev2mDistanceSensor(Port.kOnboard);
+    private final Rev2mDistanceSensor distanceSensor = new Rev2mDistanceSensor(Port.kOnboard);
 
     //Shuffleboard
     private final GenericEntry armPositionEntry = Telemetry.teleopTab.add("Arm Position", 0).getEntry();
+
+    private GenericEntry distanceSensorEntry = Telemetry.teleopTab.add("Distance Sensor", 0).getEntry();
 
     private static IntakeSubsystem instance;
 
@@ -45,12 +48,19 @@ public class IntakeSubsystem extends SubsystemBase
     private final Command rollerCommand = new Command()
     {
         boolean isLoaded = false;
+
+        @Override
+        public void initialize()
+        {
+            //distanceSensor.setEnabled(true);
+        }
+
         @Override
         public void execute()
         {
             rollerMotor.set(-1);
             //TODO: Get measurement from lasers.
-            double noteDistance = 50;
+            double noteDistance = distanceSensor.getRange(Unit.kMillimeters);
             if (noteDistance < IntakeConstants.kNoteInDistance)
             {
                 isLoaded = true;
@@ -61,6 +71,7 @@ public class IntakeSubsystem extends SubsystemBase
         public void end(boolean isInterrupted)
         {
             rollerMotor.stopMotor();
+            //distanceSensor.setEnabled(false);
         }
 
         @Override
@@ -96,6 +107,8 @@ public class IntakeSubsystem extends SubsystemBase
         //Configure the motors and encoders for use.
         configMotors();
         configEncoders();
+
+        distanceSensor.setEnabled(true);
 
         rollerCommand.addRequirements(this);
     }
@@ -166,6 +179,7 @@ public class IntakeSubsystem extends SubsystemBase
         }
         //Update arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
+        distanceSensorEntry.setDouble(distanceSensor.getRange(Unit.kMillimeters));
     }
 
     /**

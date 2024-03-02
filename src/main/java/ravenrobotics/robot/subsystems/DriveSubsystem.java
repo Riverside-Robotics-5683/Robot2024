@@ -145,14 +145,13 @@ public class DriveSubsystem extends SubsystemBase
     {
         //Configure the motors and encoders for use.
         configMotors();
-        configEncoders();
 
         //Setup for simulation
         if(Robot.isSimulation())
         {
             addMotorsToSim();
         }
-        
+
         //Add the Field2d widget to Shuffleboard so we can see the robot's position.
         Telemetry.teleopTab.add("Robot Position", fieldData);
     }
@@ -197,6 +196,13 @@ public class DriveSubsystem extends SubsystemBase
             //Add the subsystem as a requirement for the AutoBuilder commands.
             instance
         );
+    }
+
+    public void setupOdometry()
+    {
+        driveOdometry = new MecanumDriveOdometry(KinematicsConstants.kDriveKinematics,
+        IMUSubsystem.getInstance().getYaw(),
+        getWheelPositions());
     }
 
     /**
@@ -253,10 +259,10 @@ public class DriveSubsystem extends SubsystemBase
     {
         //Create a MecanumDriveWheelSpeeds object from the encoder speeds.
         var speeds = new MecanumDriveWheelSpeeds(
-            frontLeftEncoder.getVelocity(),
-            frontRightEncoder.getVelocity(),
-            backLeftEncoder.getVelocity(),
-            backRightEncoder.getVelocity()
+            frontLeftEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor,
+            frontRightEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor,
+            backLeftEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor,
+            backRightEncoder.getVelocity() / DrivetrainConstants.kEncoderVelocityConversionFactor
         );
 
         return KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
@@ -270,10 +276,10 @@ public class DriveSubsystem extends SubsystemBase
     public MecanumDriveWheelPositions getWheelPositions()
     {
         return new MecanumDriveWheelPositions(
-            frontLeftEncoder.getPosition(),
-            frontRightEncoder.getPosition(),
-            backLeftEncoder.getPosition(),
-            backRightEncoder.getPosition()
+            frontLeftEncoder.getPosition() / DrivetrainConstants.kEncoderDistanceConversionFactor,
+            frontRightEncoder.getPosition() / DrivetrainConstants.kEncoderDistanceConversionFactor,
+            backLeftEncoder.getPosition()  / DrivetrainConstants.kEncoderDistanceConversionFactor,
+            backRightEncoder.getPosition() / DrivetrainConstants.kEncoderDistanceConversionFactor
         );
     }
 
@@ -397,36 +403,15 @@ public class DriveSubsystem extends SubsystemBase
         backLeft.setIdleMode(IdleMode.kBrake);
         backRight.setIdleMode(IdleMode.kBrake);
 
+        frontLeftEncoder.setPosition(0);
+        frontRightEncoder.setPosition(0);
+        backLeftEncoder.setPosition(0);
+        backRightEncoder.setPosition(0);
+
         //Save the configuration to the motors.
         frontLeft.burnFlash();
         backLeft.burnFlash();
         frontRight.burnFlash();
         backRight.burnFlash();
-    }
-
-    private void configEncoders()
-    {
-        //Set positions to 0.
-        frontLeftEncoder.setPosition(0.0);
-        frontRightEncoder.setPosition(0.0);
-        backLeftEncoder.setPosition(0.0);
-        backRightEncoder.setPosition(0.0);
-
-        //Sets the velocity conversion factor to give us m/s.
-        frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
-        frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
-        backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
-        backRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderVelocityConversionFactor);
-        //Sets the position factor to give us accurate distance measurements.
-        frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
-        frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
-        backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
-        backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderDistanceConversionFactor);
-
-        //Initialize odometry since encoders are ready.
-        driveOdometry = new MecanumDriveOdometry(
-            KinematicsConstants.kDriveKinematics,
-            IMUSubsystem.getInstance().getYaw(), 
-            getWheelPositions());
     }
 }

@@ -71,6 +71,15 @@ public class IMUSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
+        if(getYaw().getDegrees() > 360.0)
+        {
+            imu.setYaw(getYaw().getDegrees() - 360.0);
+        }
+        else if(getYaw().getDegrees() < -360.0)
+        {
+            imu.setYaw(getYaw().getDegrees() + 360.0);
+        }
+
         //Update IMU heading on Shuffleboard
         imuHeading.setDouble(getYaw().getDegrees());
     }

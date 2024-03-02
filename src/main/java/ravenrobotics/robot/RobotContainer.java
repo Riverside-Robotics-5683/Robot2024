@@ -5,12 +5,10 @@
 package ravenrobotics.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -19,8 +17,8 @@ import ravenrobotics.robot.Constants.DriverStationConstants;
 import ravenrobotics.robot.commands.DriveCommand;
 import ravenrobotics.robot.commands.RunFlywheelCommand;
 import ravenrobotics.robot.commands.autos.DriveForwardAuto;
+import ravenrobotics.robot.subsystems.ClimberSubsystem;
 import ravenrobotics.robot.subsystems.DriveSubsystem;
-import ravenrobotics.robot.subsystems.FlywheelSubsystem;
 import ravenrobotics.robot.subsystems.IMUSubsystem;
 import ravenrobotics.robot.subsystems.IntakeSubsystem;
 import ravenrobotics.robot.subsystems.IntakeSubsystem.IntakeArmPosition;
@@ -58,6 +56,7 @@ public class RobotContainer
     Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
 
     DriveSubsystem.getInstance().configPathPlanner();
+    DriveSubsystem.getInstance().setupOdometry();
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -65,6 +64,8 @@ public class RobotContainer
 
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 
+    ClimberSubsystem.getInstance();
+    
     //Configure configured controller bindings.
     configureBindings();
     DriveSubsystem.getInstance().setDefaultCommand(driveCommand);

@@ -37,7 +37,6 @@ public class Constants
         /////////////////////
         ///Other Constants///
         /////////////////////
-        //TODO: Find actual speed of the drivetrain, using number from online for now.
         public static final double kDriveMaxSpeedMPS = Units.feetToMeters(13.87);
         //Slew rates.
         public static final double kTranslationSlewRate = 1.5;
