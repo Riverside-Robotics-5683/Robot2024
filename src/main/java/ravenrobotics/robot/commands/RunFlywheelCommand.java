@@ -32,7 +32,7 @@ public class RunFlywheelCommand extends Command
     {
         driveSubsystem.drive(new ChassisSpeeds(0, 0, 0));
         flywheelSubsystem.shootOn();
-        Timer.delay(1);
+        Timer.delay(0.8);
         intakeSubsystem.runRollers();
     }
 

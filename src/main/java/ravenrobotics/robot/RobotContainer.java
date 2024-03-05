@@ -57,18 +57,19 @@ public class RobotContainer
     //Put the TeleOp mode chooser on the dashboard.
     Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
 
+    ClimberSubsystem.getInstance();
+
     DriveSubsystem.getInstance().configPathPlanner();
 
     NamedCommands.registerCommand("lineUpSpeaker", new LineUpWithSpeakerCommand());
     NamedCommands.registerCommand("shootNote", new AutoShootCommand());
+    NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand());
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
 
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
-
-    ClimberSubsystem.getInstance();
     
     //Configure configured controller bindings.
     configureBindings();
@@ -77,24 +78,20 @@ public class RobotContainer
 
   private void configureBindings()
   {
-    // Shooting: parallel command to run intake rollers and flywheel while trigger held 
-    // driverJoystick.button(1).whileTrue(new RunFlywheelCommand());
-
-
     //Set the buttons on the joystick for field-relative and zeroing the heading.
     driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
-    driverJoystick.button(6).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
+    driverJoystick.button(12).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
-    driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
-    driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
-    driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
+    driverJoystick.button(5).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftUp()));
+    driverJoystick.button(3).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftDown()));
 
-    // driverJoystick.button(5).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
-    // driverJoystick.button(4).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
+    driverJoystick.button(6).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightUp()));
+    driverJoystick.button(4).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightDown()));
 
-    // driverJoystick.button(3).toggleOnTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().intakeRunRollers()));
-    // driverJoystick.button(3).toggleOnFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
+    // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
+    // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
+    // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
+    // driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
     
     systemsController.x().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
     systemsController.b().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
@@ -106,15 +103,10 @@ public class RobotContainer
     systemsController.rightTrigger().onFalse(new InstantCommand(() -> flywheelCommand.cancel()));
   }
 
-  public void setupTeleopCommand()
+  public void setupTeleop()
   {
-    Command selectedCommand = teleopModeChooser.getSelected();
-    if (selectedCommand == null)
-    {
-      DriveSubsystem.getInstance().setDefaultCommand(driveCommand);
-      return;
-    }
-    DriveSubsystem.getInstance().setDefaultCommand(selectedCommand);
+    ClimberSubsystem.getInstance().leftDown();
+    ClimberSubsystem.getInstance().rightDown();
   }
 
   private void toggleFieldRelative()

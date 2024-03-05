@@ -67,7 +67,7 @@ public class IMUSubsystem extends SubsystemBase
      */
     public double getXSpeed()
     {
-        var speed = imu.getAccelerationY().refresh().getValueAsDouble();
+        var speed = imu.getAccelerationX().refresh().getValueAsDouble();
         return speed;
     }
 

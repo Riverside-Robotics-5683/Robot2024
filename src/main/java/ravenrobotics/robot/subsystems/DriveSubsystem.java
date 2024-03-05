@@ -256,11 +256,18 @@ public class DriveSubsystem extends SubsystemBase
      */
     public MecanumDriveWheelPositions getWheelPositions()
     {
+        double fLWheel, fRWheel, bLWheel, bRWheel;
+
+        fLWheel = frontLeftEncoder.getPosition();
+        fRWheel = frontRightEncoder.getPosition();
+        bLWheel = backLeftEncoder.getPosition();
+        bRWheel = backRightEncoder.getPosition();
+
         return new MecanumDriveWheelPositions(
-            frontLeftEncoder.getPosition() / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor,
-            frontRightEncoder.getPosition() / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor,
-            backLeftEncoder.getPosition()  / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor,
-            backRightEncoder.getPosition() / 42 * DrivetrainConstants.kEncoderDistanceConversionFactor
+            fLWheel,
+            fRWheel,
+            bLWheel,
+            bRWheel
         );
     }
 
@@ -287,7 +294,7 @@ public class DriveSubsystem extends SubsystemBase
         backRightEncoder.setPosition(0);
 
         drivetrainPose = newPose;
-        driveOdometry.resetPosition(newPose.getRotation(), getWheelPositions(), newPose);
+        driveOdometry.resetPosition(IMUSubsystem.getInstance().getYaw(), getWheelPositions(), newPose);
     }
 
     /**
@@ -366,6 +373,11 @@ public class DriveSubsystem extends SubsystemBase
         frontRightEncoder.setPosition(0);
         backLeftEncoder.setPosition(0);
         backRightEncoder.setPosition(0);
+
+        // frontLeftEncoder.setPositionConversionFactor(6);
+        // frontRightEncoder.setPositionConversionFactor(6);
+        // backLeftEncoder.setPositionConversionFactor(6);
+        // backRightEncoder.setPositionConversionFactor(6);
 
         //Save the configuration to the motors.
         frontLeft.burnFlash();

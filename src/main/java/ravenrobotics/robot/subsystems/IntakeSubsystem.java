@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.Rev2mDistanceSensor.Port;
+import com.revrobotics.Rev2mDistanceSensor.RangeProfile;
 import com.revrobotics.Rev2mDistanceSensor.Unit;
 
 import edu.wpi.first.networktables.GenericEntry;
@@ -35,7 +36,7 @@ public class IntakeSubsystem extends SubsystemBase
     //Shuffleboard
     private final GenericEntry armPositionEntry = Telemetry.teleopTab.add("Arm Position", 0).getEntry();
 
-    private GenericEntry distanceSensorEntry = Telemetry.teleopTab.add("Distance Sensor", 0).getEntry();
+    private final GenericEntry distanceSensorEntry = Telemetry.teleopTab.add("Distance Sensor", 0).getEntry();
 
     private static IntakeSubsystem instance;
 
@@ -108,7 +109,9 @@ public class IntakeSubsystem extends SubsystemBase
         configMotors();
         configEncoders();
 
-        distanceSensor.setEnabled(true);
+        distanceSensor.setRangeProfile(RangeProfile.kHighAccuracy);
+        distanceSensor.setDistanceUnits(Unit.kMillimeters);
+        distanceSensor.setAutomaticMode(true);
 
         rollerCommand.addRequirements(this);
     }
@@ -141,6 +144,13 @@ public class IntakeSubsystem extends SubsystemBase
         }
     }
 
+    public boolean waitForIntake()
+    {
+        boolean isReference = Math.abs(armMotorEncoder.getVelocity()) < 3;
+
+        return isReference;
+    }
+
     public void runRollers()
     {
         //changed because rollers were super speedy
@@ -149,7 +159,7 @@ public class IntakeSubsystem extends SubsystemBase
 
     public void intakeRunRollers()
     {
-        rollerMotor.set(-0.5);
+        rollerMotor.set(-0.75);
     }
 
     public void runRollersSlow()
@@ -179,7 +189,7 @@ public class IntakeSubsystem extends SubsystemBase
         }
         //Update arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
-        distanceSensorEntry.setDouble(distanceSensor.getRange(Unit.kMillimeters));
+        distanceSensorEntry.setDouble(distanceSensor.GetRange());
     }
 
     /**
