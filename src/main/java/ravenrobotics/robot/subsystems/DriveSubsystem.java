@@ -240,10 +240,10 @@ public class DriveSubsystem extends SubsystemBase
     {
         //Create a MecanumDriveWheelSpeeds object from the encoder speeds.
         var speeds = new MecanumDriveWheelSpeeds(
-            frontLeftEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor,
-            frontRightEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor,
-            backLeftEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor,
-            backRightEncoder.getVelocity() * DrivetrainConstants.kEncoderVelocityConversionFactor
+            frontLeftEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor,
+            frontRightEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor,
+            backLeftEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor,
+            backRightEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor
         );
 
         return KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
