@@ -45,8 +45,8 @@ public class Constants
         //Encoder Constants//
         /////////////////////
         public static final double kWheelCircumference = Units.inchesToMeters(6) * Math.PI;
-        public static final double kDistanceConversionFactor = kWheelCircumference * (12 / 72);
-        public static final double kVelocityConversionFactor = 12 / 72;
+        public static final double kDistanceConversionFactor = kWheelCircumference * (12.0 / 72);
+        public static final double kVelocityConversionFactor = 12.0 / 72;
     }
     //Constants for the Pigeon2 IMU, such as the ID and various configuration settings.
     public static class IMUConstants

@@ -240,10 +240,10 @@ public class DriveSubsystem extends SubsystemBase
     {
         //Create a MecanumDriveWheelSpeeds object from the encoder speeds.
         var speeds = new MecanumDriveWheelSpeeds(
-            frontLeftEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor,
-            frontRightEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor,
-            backLeftEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor,
-            backRightEncoder.getVelocity() * DrivetrainConstants.kVelocityConversionFactor
+            frontLeftEncoder.getVelocity(),
+            frontRightEncoder.getVelocity(),
+            backLeftEncoder.getVelocity(),
+            backRightEncoder.getVelocity()
         );
 
         return KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
@@ -256,18 +256,11 @@ public class DriveSubsystem extends SubsystemBase
      */
     public MecanumDriveWheelPositions getWheelPositions()
     {
-        double fLWheel, fRWheel, bLWheel, bRWheel;
-
-        fLWheel = frontLeftEncoder.getPosition();
-        fRWheel = frontRightEncoder.getPosition();
-        bLWheel = backLeftEncoder.getPosition();
-        bRWheel = backRightEncoder.getPosition();
-
         return new MecanumDriveWheelPositions(
-            fLWheel,
-            fRWheel,
-            bLWheel,
-            bRWheel
+            frontLeftEncoder.getPosition(),
+            frontRightEncoder.getPosition(),
+            backLeftEncoder.getPosition(),
+            backRightEncoder.getPosition()
         );
     }
 
@@ -374,10 +367,15 @@ public class DriveSubsystem extends SubsystemBase
         backLeftEncoder.setPosition(0);
         backRightEncoder.setPosition(0);
 
-        // frontLeftEncoder.setPositionConversionFactor(6);
-        // frontRightEncoder.setPositionConversionFactor(6);
-        // backLeftEncoder.setPositionConversionFactor(6);
-        // backRightEncoder.setPositionConversionFactor(6);
+        frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
+        frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
+        backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
+        backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
+
+        frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
+        frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
+        backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
+        backRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
 
         //Save the configuration to the motors.
         frontLeft.burnFlash();

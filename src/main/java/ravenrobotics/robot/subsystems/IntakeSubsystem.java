@@ -2,18 +2,13 @@ package ravenrobotics.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.Rev2mDistanceSensor;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.Rev2mDistanceSensor.Port;
-import com.revrobotics.Rev2mDistanceSensor.RangeProfile;
-import com.revrobotics.Rev2mDistanceSensor.Unit;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.robot.Constants.IntakeConstants;
 import ravenrobotics.robot.util.Telemetry;
@@ -30,13 +25,8 @@ public class IntakeSubsystem extends SubsystemBase
     //PID Controller for the arm.
     private final SparkPIDController armPIDController = armMotor.getPIDController();
 
-    //Distance sensor.
-    private final Rev2mDistanceSensor distanceSensor = new Rev2mDistanceSensor(Port.kOnboard);
-
     //Shuffleboard
     private final GenericEntry armPositionEntry = Telemetry.teleopTab.add("Arm Position", 0).getEntry();
-
-    private final GenericEntry distanceSensorEntry = Telemetry.teleopTab.add("Distance Sensor", 0).getEntry();
 
     private static IntakeSubsystem instance;
 
@@ -45,42 +35,6 @@ public class IntakeSubsystem extends SubsystemBase
         kDeployed,
         kRetracted
     }
-
-    private final Command rollerCommand = new Command()
-    {
-        boolean isLoaded = false;
-
-        @Override
-        public void initialize()
-        {
-            //distanceSensor.setEnabled(true);
-        }
-
-        @Override
-        public void execute()
-        {
-            rollerMotor.set(-1);
-            //TODO: Get measurement from lasers.
-            double noteDistance = distanceSensor.getRange(Unit.kMillimeters);
-            if (noteDistance < IntakeConstants.kNoteInDistance)
-            {
-                isLoaded = true;
-            }
-        }
-
-        @Override
-        public void end(boolean isInterrupted)
-        {
-            rollerMotor.stopMotor();
-            //distanceSensor.setEnabled(false);
-        }
-
-        @Override
-        public boolean isFinished()
-        {
-            return isLoaded;
-        }
-    };
 
     /**
      * Returns the active instance of the IntakeSubsystem.
@@ -108,26 +62,6 @@ public class IntakeSubsystem extends SubsystemBase
         //Configure the motors and encoders for use.
         configMotors();
         configEncoders();
-
-        distanceSensor.setRangeProfile(RangeProfile.kHighAccuracy);
-        distanceSensor.setDistanceUnits(Unit.kMillimeters);
-        distanceSensor.setAutomaticMode(true);
-
-        rollerCommand.addRequirements(this);
-    }
-
-    /**
-     * Run the full intake routine.
-     */
-    public void runIntakeRoutine()
-    {
-        setIntakePosition(IntakeArmPosition.kDeployed);
-        rollerCommand.schedule();
-        while (rollerCommand.isScheduled())
-        {
-            continue;
-        }
-        setIntakePosition(IntakeArmPosition.kRetracted);
     }
 
     /**
@@ -172,14 +106,6 @@ public class IntakeSubsystem extends SubsystemBase
         rollerMotor.stopMotor();
     }
 
-    /**
-     * Interrupts (cancels) the roller thread.
-     */
-    public void cancelWaitRoutine()
-    {
-        rollerCommand.cancel();
-    }
-
     @Override
     public void periodic()
     {
@@ -189,7 +115,6 @@ public class IntakeSubsystem extends SubsystemBase
         }
         //Update arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
-        distanceSensorEntry.setDouble(distanceSensor.GetRange());
     }
 
     /**

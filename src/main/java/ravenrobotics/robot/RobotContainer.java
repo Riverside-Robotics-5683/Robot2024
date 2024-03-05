@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import ravenrobotics.robot.Constants.DriverStationConstants;
+import ravenrobotics.robot.Constants.DrivetrainConstants;
 import ravenrobotics.robot.commands.DriveCommand;
 import ravenrobotics.robot.commands.RunFlywheelCommand;
 import ravenrobotics.robot.commands.autos.DriveForwardAuto;
@@ -57,7 +58,7 @@ public class RobotContainer
     //Put the TeleOp mode chooser on the dashboard.
     Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
 
-    ClimberSubsystem.getInstance();
+    System.out.println("Distance Conversion Factor:" + DrivetrainConstants.kDistanceConversionFactor);
 
     DriveSubsystem.getInstance().configPathPlanner();
 
