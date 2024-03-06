@@ -81,6 +81,8 @@ public class RobotContainer
     driverJoystick.pov(0).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothUp()));
     driverJoystick.pov(180).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothDown()));
 
+    driverJoystick.button(11).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().test()));
+
     // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
     // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
     // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));

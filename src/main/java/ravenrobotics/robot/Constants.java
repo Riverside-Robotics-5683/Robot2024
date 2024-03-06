@@ -67,7 +67,7 @@ public class Constants
         public static final double kTrimZ = 0.0;
         //Mounting position in degrees.
         public static final double kMountPitch = 0.0;
-        public static final double kMountRoll = 0.0;
+        public static final double kMountRoll = 180.0;
         public static final double kMountYaw = 0.0;
         //Whether specific features should be enabled. (keep them to false)
         public static final boolean kDisableNoMotionCalibration = false;
@@ -112,7 +112,7 @@ public class Constants
         public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = false;
 
-        public static final double kClimberSetpoint = -30;
+        public static final double kClimberSetpoint = -45;
     }
 
     //Constants for kinematics.

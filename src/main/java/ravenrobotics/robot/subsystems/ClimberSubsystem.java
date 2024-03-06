@@ -66,7 +66,7 @@ public class ClimberSubsystem extends SubsystemBase
             return;
         }
 
-        double newReference = MathUtil.clamp(leftClimberEncoder.getPosition() + increment, -30, 0);
+        double newReference = MathUtil.clamp(leftClimberEncoder.getPosition() + increment, ClimberConstants.kClimberSetpoint, 0);
         
         leftClimberController.setReference(newReference, ControlType.kPosition);
     }
@@ -78,7 +78,7 @@ public class ClimberSubsystem extends SubsystemBase
             return;
         }
 
-        double newReference = MathUtil.clamp(rightClimberEncoder.getPosition() + increment, -30, 0);
+        double newReference = MathUtil.clamp(rightClimberEncoder.getPosition() + increment, ClimberConstants.kClimberSetpoint, 0);
 
         rightClimberController.setReference(newReference, ControlType.kPosition);
     }
@@ -93,6 +93,11 @@ public class ClimberSubsystem extends SubsystemBase
     {
         leftDown();
         rightDown();
+    }
+
+    public void test()
+    {
+        leftClimber.set(-.75);
     }
 
     private void configMotors()
@@ -112,8 +117,8 @@ public class ClimberSubsystem extends SubsystemBase
         leftClimberEncoder.setPosition(0.0);
         rightClimberEncoder.setPosition(0.0);
 
-        leftClimberController.setOutputRange(-.75, .25);
-        rightClimberController.setOutputRange(-.75, .25);
+        leftClimberController.setOutputRange(-.75, .75);
+        rightClimberController.setOutputRange(-.75, .75);
 
         leftClimberController.setP(1.0);
         leftClimberController.setI(0.0);
