@@ -12,6 +12,11 @@ public class Constants
         public static final int kDriverPort = 0;
         public static final int kSystemsPort = 1;
     }
+    public static class MotorConstants
+    {
+        public static final int kAmpLimit = 35;
+    }
+
     //Constants for the drivetrain, like motor IDs and whether they should be inverted.
     public static class DrivetrainConstants
     {
@@ -106,6 +111,8 @@ public class Constants
 
         public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = false;
+
+        public static final double kClimberSetpoint = -30;
     }
 
     //Constants for kinematics.

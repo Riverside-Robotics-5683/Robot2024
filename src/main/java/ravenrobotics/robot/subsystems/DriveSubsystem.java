@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import ravenrobotics.robot.AutoConstants;
 import ravenrobotics.robot.Constants.DrivetrainConstants;
 import ravenrobotics.robot.Constants.KinematicsConstants;
+import ravenrobotics.robot.Constants.MotorConstants;
 import ravenrobotics.robot.util.Telemetry;
 
 public class DriveSubsystem extends SubsystemBase
@@ -361,6 +362,11 @@ public class DriveSubsystem extends SubsystemBase
         frontRight.setIdleMode(IdleMode.kBrake);
         backLeft.setIdleMode(IdleMode.kBrake);
         backRight.setIdleMode(IdleMode.kBrake);
+
+        frontLeft.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        frontRight.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        backLeft.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        backRight.setSmartCurrentLimit(MotorConstants.kAmpLimit);
 
         frontLeftEncoder.setPosition(0);
         frontRightEncoder.setPosition(0);

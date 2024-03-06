@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.robot.Constants.IntakeConstants;
+import ravenrobotics.robot.Constants.MotorConstants;
 import ravenrobotics.robot.util.Telemetry;
 
 public class IntakeSubsystem extends SubsystemBase
@@ -129,9 +130,12 @@ public class IntakeSubsystem extends SubsystemBase
         rollerMotor.setIdleMode(IdleMode.kCoast);
         armMotor.setIdleMode(IdleMode.kBrake);
 
+        rollerMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        armMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+
         armMotor.setClosedLoopRampRate(0.01);
         armPIDController.setFeedbackDevice(armMotorEncoder);
-        armPIDController.setOutputRange(-0.25, 0.5);
+        armPIDController.setOutputRange(-0.35, 0.5);
 
         //Set the PID constants for the PID controller.
         armPIDController.setP(IntakeConstants.kArmP);

@@ -2,12 +2,14 @@ package ravenrobotics.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.robot.Constants.FlywheelConstants;
+import ravenrobotics.robot.Constants.MotorConstants;
 
 public class FlywheelSubsystem extends SubsystemBase 
 {
@@ -93,6 +95,12 @@ public class FlywheelSubsystem extends SubsystemBase
 
         topMotor.setInverted(true);
         bottomMotor.setInverted(true);
+
+        topMotor.setIdleMode(IdleMode.kCoast);
+        bottomMotor.setIdleMode(IdleMode.kCoast);
+
+        topMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
 
         topMotor.burnFlash();
         bottomMotor.burnFlash();

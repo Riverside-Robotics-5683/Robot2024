@@ -13,9 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import ravenrobotics.robot.Constants.DriverStationConstants;
-import ravenrobotics.robot.Constants.DrivetrainConstants;
 import ravenrobotics.robot.commands.DriveCommand;
 import ravenrobotics.robot.commands.RunFlywheelCommand;
 import ravenrobotics.robot.commands.autos.DriveForwardAuto;
@@ -38,11 +36,9 @@ public class RobotContainer
   public boolean isFieldRelative = false;
   private GenericEntry isFieldRelativeEntry = Telemetry.teleopTab.add("Field Relative", false).getEntry();
 
-  private final SendableChooser<Command> teleopModeChooser = new SendableChooser<Command>();
-
   private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
 
-  private SendableChooser<Command> autoChooser;
+  private final SendableChooser<Command> autoChooser;
 
   //Main drive command.
   private final DriveCommand driveCommand = new DriveCommand(
@@ -53,13 +49,6 @@ public class RobotContainer
 
   public RobotContainer()
   {
-    //Add drive command to TeleOp mode chooser.
-    teleopModeChooser.addOption("Drive", driveCommand);
-    //Put the TeleOp mode chooser on the dashboard.
-    Telemetry.teleopTab.add("TeleOp Mode", teleopModeChooser);
-
-    System.out.println("Distance Conversion Factor:" + DrivetrainConstants.kDistanceConversionFactor);
-
     DriveSubsystem.getInstance().configPathPlanner();
 
     NamedCommands.registerCommand("lineUpSpeaker", new LineUpWithSpeakerCommand());
@@ -83,11 +72,14 @@ public class RobotContainer
     driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
     driverJoystick.button(12).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverJoystick.button(5).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftUp()));
-    driverJoystick.button(3).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftDown()));
+    driverJoystick.button(5).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftIncrement(-2)));
+    driverJoystick.button(3).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftIncrement(2)));
 
-    driverJoystick.button(6).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightUp()));
-    driverJoystick.button(4).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightDown()));
+    driverJoystick.button(6).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightIncrement(-2)));
+    driverJoystick.button(4).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightIncrement(2)));
+
+    driverJoystick.pov(0).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothUp()));
+    driverJoystick.pov(180).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothDown()));
 
     // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
     // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));

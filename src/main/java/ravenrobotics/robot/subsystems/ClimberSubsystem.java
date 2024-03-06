@@ -7,11 +7,10 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.robot.Constants.ClimberConstants;
-import ravenrobotics.robot.util.Telemetry;
+import ravenrobotics.robot.Constants.MotorConstants;
 
 public class ClimberSubsystem extends SubsystemBase
 {
@@ -22,9 +21,6 @@ public class ClimberSubsystem extends SubsystemBase
     private final CANSparkMax rightClimber = new CANSparkMax(ClimberConstants.kRightClimber, MotorType.kBrushless);
     private final RelativeEncoder rightClimberEncoder = rightClimber.getEncoder();
     private final SparkPIDController rightClimberController = rightClimber.getPIDController();
-
-    private final GenericEntry leftClimberEntry = Telemetry.teleopTab.add("Left Climber", 0).getEntry();
-    private final GenericEntry rightClimberEntry = Telemetry.teleopTab.add("Right Climber", 0).getEntry();
 
     private static ClimberSubsystem instance;
 
@@ -63,14 +59,40 @@ public class ClimberSubsystem extends SubsystemBase
         rightClimberController.setReference(-30, ControlType.kPosition);
     }
 
-    @Override
-    public void periodic()
+    public void leftIncrement(double increment)
     {
-        // if(DriverStation.isEnabled())
-        // {
-        //     System.out.println("Left Motor Position:" + leftClimberEncoder.getPosition());
-        //     System.out.println("Right Motor Position:" + rightClimberEncoder.getPosition());
-        // }
+        if (increment < -30 || increment > 0)
+        {
+            return;
+        }
+
+        double newReference = MathUtil.clamp(leftClimberEncoder.getPosition() + increment, -30, 0);
+        
+        leftClimberController.setReference(newReference, ControlType.kPosition);
+    }
+
+    public void rightIncrement(double increment)
+    {
+        if (increment < -30 || increment > 0)
+        {
+            return;
+        }
+
+        double newReference = MathUtil.clamp(rightClimberEncoder.getPosition() + increment, -30, 0);
+
+        rightClimberController.setReference(newReference, ControlType.kPosition);
+    }
+
+    public void bothUp()
+    {
+        leftUp();
+        rightUp();
+    }
+
+    public void bothDown()
+    {
+        leftDown();
+        rightDown();
     }
 
     private void configMotors()
@@ -84,11 +106,14 @@ public class ClimberSubsystem extends SubsystemBase
         leftClimber.setInverted(ClimberConstants.kInvertLeftSide);
         rightClimber.setInverted(ClimberConstants.kInvertRightSide);
 
+        leftClimber.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        rightClimber.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+
         leftClimberEncoder.setPosition(0.0);
         rightClimberEncoder.setPosition(0.0);
 
-        leftClimberController.setOutputRange(-.5, .25);
-        rightClimberController.setOutputRange(-.5, .25);
+        leftClimberController.setOutputRange(-.75, .25);
+        rightClimberController.setOutputRange(-.75, .25);
 
         leftClimberController.setP(1.0);
         leftClimberController.setI(0.0);
