@@ -1,11 +1,11 @@
-package ravenrobotics.robot.commands.autos.ppcommands;
+package ravenrobotics.shootloops.commands.autos.ppcommands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import ravenrobotics.robot.subsystems.DriveSubsystem;
-import ravenrobotics.robot.subsystems.IntakeSubsystem;
-import ravenrobotics.robot.subsystems.IntakeSubsystem.IntakeArmPosition;
+import ravenrobotics.shootloops.subsystems.DriveSubsystem;
+import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
+import ravenrobotics.shootloops.subsystems.IntakeSubsystem.IntakeArmPosition;
 
 public class IntakeNoteCommand extends Command 
 {

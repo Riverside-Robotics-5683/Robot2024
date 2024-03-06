@@ -1,4 +1,4 @@
-package ravenrobotics.robot.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -8,8 +8,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Constants.IMUConstants;
-import ravenrobotics.robot.util.Telemetry;
+import ravenrobotics.shootloops.Constants.IMUConstants;
+import ravenrobotics.shootloops.util.Telemetry;
 
 public class IMUSubsystem extends SubsystemBase 
 {

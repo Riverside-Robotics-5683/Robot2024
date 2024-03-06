@@ -1,4 +1,4 @@
-package ravenrobotics.robot.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -8,8 +8,8 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Constants.FlywheelConstants;
-import ravenrobotics.robot.Constants.MotorConstants;
+import ravenrobotics.shootloops.Constants.FlywheelConstants;
+import ravenrobotics.shootloops.Constants.MotorConstants;
 
 public class FlywheelSubsystem extends SubsystemBase 
 {

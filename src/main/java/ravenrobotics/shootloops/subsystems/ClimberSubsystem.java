@@ -1,4 +1,4 @@
-package ravenrobotics.robot.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -9,8 +9,8 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Constants.ClimberConstants;
-import ravenrobotics.robot.Constants.MotorConstants;
+import ravenrobotics.shootloops.Constants.ClimberConstants;
+import ravenrobotics.shootloops.Constants.MotorConstants;
 
 public class ClimberSubsystem extends SubsystemBase
 {

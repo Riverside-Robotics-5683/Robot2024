@@ -1,7 +1,7 @@
-package ravenrobotics.robot.util;
+package ravenrobotics.shootloops.util;
 
 import edu.wpi.first.math.MathUtil;
-import ravenrobotics.robot.Constants.DrivetrainConstants;
+import ravenrobotics.shootloops.Constants.DrivetrainConstants;
 
 public class Conversions
 {

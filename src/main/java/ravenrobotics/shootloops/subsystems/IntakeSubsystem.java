@@ -1,4 +1,4 @@
-package ravenrobotics.robot.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -10,9 +10,9 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Constants.IntakeConstants;
-import ravenrobotics.robot.Constants.MotorConstants;
-import ravenrobotics.robot.util.Telemetry;
+import ravenrobotics.shootloops.Constants.IntakeConstants;
+import ravenrobotics.shootloops.Constants.MotorConstants;
+import ravenrobotics.shootloops.util.Telemetry;
 
 public class IntakeSubsystem extends SubsystemBase
 {
