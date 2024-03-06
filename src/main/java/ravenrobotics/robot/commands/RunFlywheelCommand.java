@@ -32,7 +32,12 @@ public class RunFlywheelCommand extends Command
     {
         driveSubsystem.drive(new ChassisSpeeds(0, 0, 0));
         flywheelSubsystem.shootOn();
-        Timer.delay(0.8);
+        while (flywheelSubsystem.getVelocity() < 5500)
+        {
+            //System.out.println("Velocity:" + flywheelSubsystem.getVelocity());
+            continue;
+        }
+        Timer.delay(0.05);
         intakeSubsystem.runRollers();
     }
 

@@ -100,8 +100,8 @@ public class RobotContainer
 
   public void setupTeleop()
   {
-    ClimberSubsystem.getInstance().leftDown();
-    ClimberSubsystem.getInstance().rightDown();
+    // ClimberSubsystem.getInstance().leftDown();
+    // ClimberSubsystem.getInstance().rightDown();
   }
 
   private void toggleFieldRelative()

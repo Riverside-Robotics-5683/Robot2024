@@ -135,7 +135,7 @@ public class IntakeSubsystem extends SubsystemBase
 
         armMotor.setClosedLoopRampRate(0.01);
         armPIDController.setFeedbackDevice(armMotorEncoder);
-        armPIDController.setOutputRange(-0.35, 0.5);
+        armPIDController.setOutputRange(-0.3, 0.5);
 
         //Set the PID constants for the PID controller.
         armPIDController.setP(IntakeConstants.kArmP);

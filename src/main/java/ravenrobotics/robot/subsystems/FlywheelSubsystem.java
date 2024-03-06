@@ -50,42 +50,26 @@ public class FlywheelSubsystem extends SubsystemBase
         //Return the instance
         return instance;
     }
-    /**
-     * Enables the flywheel
-     */
-    public void enabled()
+
+    public void shootOn() 
     {
-        isEnabled = true;
-    }
-    /**
-     * Disables the flywheel
-     */
-    public void disabled()
-    {
-        isEnabled = false;
+        topMotor.set(-1);
+        bottomMotor.set(-1);
     }
 
-    public void override()
+    public void stopFly()
     {
-        isOverride = true;
+     topMotor.set(0);
+     bottomMotor.set(0);
     }
-   
-    public void unOverride()
+
+    public double getVelocity()
     {
-        isOverride = false;
+        return -(topMotorEncoder.getVelocity() + bottomMotorEncoder.getVelocity() / (double)2);
     }
 
     @Override
     public void periodic(){
-        if(isEnabled && !isOverride){
-            topMotor.set(controller.calculate(topMotorEncoder.getVelocity(), FlywheelConstants.kSetPoint));
-            bottomMotor.set(controller.calculate(bottomMotorEncoder.getVelocity(), FlywheelConstants.kSetPoint));
-        }
-        if (isOverride)
-        {
-            topMotor.set(rampLimiter.calculate(1));
-            bottomMotor.set(rampLimiter.calculate(1));
-        }
     }
 
     public void configMotors()
@@ -102,20 +86,13 @@ public class FlywheelSubsystem extends SubsystemBase
         topMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
         bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
 
+        topMotorEncoder.setPosition(0.0);
+        bottomMotorEncoder.setPosition(0.0);
+
+        topMotorEncoder.setVelocityConversionFactor(3);
+        bottomMotorEncoder.setVelocityConversionFactor(3);
+
         topMotor.burnFlash();
         bottomMotor.burnFlash();
-    }
-    
-
-    public void shootOn() 
-    {
-        topMotor.set(-1);
-        bottomMotor.set(-1);
-    }
-
-    public void stopFly()
-    {
-     topMotor.set(0);
-     bottomMotor.set(0);
     }
 }
