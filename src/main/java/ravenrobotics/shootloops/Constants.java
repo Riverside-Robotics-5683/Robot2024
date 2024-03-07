@@ -84,7 +84,7 @@ public class Constants
         public static final double kArmI = 0.0;
         public static final double kArmD = 0.5;
         
-        public static final double kArmDeployedSetpoint = 58.3;
+        public static final double kArmDeployedSetpoint = 58;
 
         public static final double kRollerFF = 1.0;
         public static final double kRollerSetpoint = 4000;
@@ -112,7 +112,7 @@ public class Constants
         public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = false;
 
-        public static final double kClimberSetpoint = -45;
+        public static final double kClimberSetpoint = 40;
     }
 
     //Constants for kinematics.

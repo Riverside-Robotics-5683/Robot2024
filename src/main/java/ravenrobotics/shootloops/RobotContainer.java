@@ -22,7 +22,9 @@ import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
 import ravenrobotics.shootloops.subsystems.DriveSubsystem;
 import ravenrobotics.shootloops.subsystems.IMUSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
+import ravenrobotics.shootloops.subsystems.RGBSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem.IntakeArmPosition;
+import ravenrobotics.shootloops.subsystems.RGBSubsystem.RGBValues;
 import ravenrobotics.shootloops.util.Telemetry;
 
 public class RobotContainer 
@@ -55,11 +57,15 @@ public class RobotContainer
     NamedCommands.registerCommand("shootNote", new AutoShootCommand());
     NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand());
 
+    RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
+
     autoChooser = AutoBuilder.buildAutoChooser();
 
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
 
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
+
+    ClimberSubsystem.getInstance();
     
     //Configure configured controller bindings.
     configureBindings();
@@ -72,16 +78,16 @@ public class RobotContainer
     driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
     driverJoystick.button(12).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverJoystick.button(5).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftIncrement(-2)));
-    driverJoystick.button(3).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftIncrement(2)));
+    driverJoystick.button(5).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftIncrement(2)));
+    driverJoystick.button(3).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().leftIncrement(-2)));
 
-    driverJoystick.button(6).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightIncrement(-2)));
-    driverJoystick.button(4).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightIncrement(2)));
+    driverJoystick.button(6).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightIncrement(2)));
+    driverJoystick.button(4).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().rightIncrement(-2)));
 
     driverJoystick.pov(0).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothUp()));
     driverJoystick.pov(180).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothDown()));
 
-    driverJoystick.button(11).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().test()));
+    driverJoystick.button(11).onTrue(new InstantCommand(() -> RGBSubsystem.getInstance().setPattern(RGBValues.kTest)));
 
     // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
     // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
