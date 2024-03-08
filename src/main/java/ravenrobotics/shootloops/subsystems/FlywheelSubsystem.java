@@ -5,8 +5,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.math.controller.BangBangController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.FlywheelConstants;
 import ravenrobotics.shootloops.Constants.MotorConstants;
@@ -21,17 +19,8 @@ public class FlywheelSubsystem extends SubsystemBase
     private final RelativeEncoder topMotorEncoder = topMotor.getEncoder();
     private final RelativeEncoder bottomMotorEncoder = bottomMotor.getEncoder();
 
-    //Ramps the speeds FlyWheel to a set velocity when enabled
-    private final BangBangController controller = new BangBangController();
-
     //Allows you to use FlywheelSubsystem in other classes
     private static FlywheelSubsystem instance;
-
-    private final SlewRateLimiter rampLimiter = new SlewRateLimiter(0.5);
-
-    //Tell the flywheel is enabled
-    private boolean isEnabled = false;
-    private boolean isOverride = false;
 
     /**
      * Returns the active instance of the FlyWheelSubSystem.

@@ -112,7 +112,7 @@ public class Constants
         public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = false;
 
-        public static final double kClimberSetpoint = 40;
+        public static final double kClimberSetpoint = 591.6;
     }
 
     //Constants for kinematics.

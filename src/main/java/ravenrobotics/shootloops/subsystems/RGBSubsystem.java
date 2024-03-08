@@ -12,7 +12,9 @@ public class RGBSubsystem extends SubsystemBase
     public enum RGBValues
     {
         kDefault(0.81),
-        kNoteIn(0.65),
+        kNoteInDefault(0.65),
+        kShooting(0.77),
+        kIntakeOut(0.61),
         kTest(-0.55);
 
         private final double id;

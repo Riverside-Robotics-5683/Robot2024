@@ -7,12 +7,15 @@ import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.IntakeConstants;
 import ravenrobotics.shootloops.Constants.MotorConstants;
+import ravenrobotics.shootloops.subsystems.RGBSubsystem.RGBValues;
 import ravenrobotics.shootloops.util.Telemetry;
 
 public class IntakeSubsystem extends SubsystemBase
@@ -27,7 +30,8 @@ public class IntakeSubsystem extends SubsystemBase
     //PID Controller for the arm.
     private final SparkPIDController armPIDController = armMotor.getPIDController();
 
-    //private final DigitalInput distanceSensor = new DigitalInput(0);
+    private final DigitalInput distanceSensor = new DigitalInput(0);
+    private final Debouncer distanceFilter = new Debouncer(0.1, DebounceType.kBoth);
 
     //Shuffleboard
     private final GenericEntry armPositionEntry = Telemetry.teleopTab.add("Arm Position", 0).getEntry();
@@ -75,10 +79,15 @@ public class IntakeSubsystem extends SubsystemBase
      */
     public void setIntakePosition(IntakeArmPosition position)
     {
-        switch(position)
+        if (position == IntakeArmPosition.kDeployed)
         {
-            case kDeployed -> armPIDController.setReference(IntakeConstants.kArmDeployedSetpoint, ControlType.kPosition);
-            case kRetracted -> armPIDController.setReference(0, ControlType.kPosition);
+            RGBSubsystem.getInstance().setPattern(RGBValues.kIntakeOut);
+            armPIDController.setReference(IntakeConstants.kArmDeployedSetpoint, ControlType.kPosition);
+        }
+        else if (position == IntakeArmPosition.kRetracted)
+        {
+            RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
+            armPIDController.setReference(0, ControlType.kPosition);
         }
     }
 
@@ -108,6 +117,11 @@ public class IntakeSubsystem extends SubsystemBase
     public void stopRollers()
     {
         rollerMotor.stopMotor();
+    }
+
+    public boolean getDistanceSensor()
+    {
+        return distanceFilter.calculate(distanceSensor.get());
     }
 
     @Override

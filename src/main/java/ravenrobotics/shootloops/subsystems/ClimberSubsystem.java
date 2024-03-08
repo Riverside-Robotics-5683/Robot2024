@@ -8,13 +8,10 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.ClimberConstants;
-import ravenrobotics.shootloops.Constants.MotorConstants;
-import ravenrobotics.shootloops.util.Telemetry;
 
-public class ClimberSubsystem extends SubsystemBase
+public class ClimberSubsystem extends SubsystemBase 
 {
     private final CANSparkMax leftClimber = new CANSparkMax(ClimberConstants.kLeftClimber, MotorType.kBrushless);
     private final RelativeEncoder leftClimberEncoder = leftClimber.getEncoder();
@@ -24,10 +21,13 @@ public class ClimberSubsystem extends SubsystemBase
     private final RelativeEncoder rightClimberEncoder = rightClimber.getEncoder();
     private final SparkPIDController rightClimberController = rightClimber.getPIDController();
 
-    private static ClimberSubsystem instance;
+    public enum ClimberPosition
+    {
+        kDown,
+        kUp
+    }
 
-    private final GenericEntry leftEntry = Telemetry.teleopTab.add("Left Climber", 45).getEntry();
-    private final GenericEntry rightEntry = Telemetry.teleopTab.add("Right Climber", 45).getEntry();
+    private static ClimberSubsystem instance;
 
     public static ClimberSubsystem getInstance()
     {
@@ -41,73 +41,63 @@ public class ClimberSubsystem extends SubsystemBase
 
     private ClimberSubsystem()
     {
-        System.out.println("Creating ClimberSubsystem instance.");
         configMotors();
-        leftEntry.setDouble(leftClimberEncoder.getPosition());
-        rightEntry.setDouble(rightClimberEncoder.getPosition());
     }
 
-    public void leftUp()
+    public void leftToPosition(ClimberPosition position)
     {
-        leftClimberController.setReference(-ClimberConstants.kClimberSetpoint, ControlType.kPosition);
+        switch (position)
+        {
+            case kUp -> leftClimberController.setReference(ClimberConstants.kClimberSetpoint, ControlType.kPosition);
+            case kDown -> leftClimberController.setReference(0, ControlType.kPosition);
+        }
     }
 
-    public void rightUp()
+    public void rightToPosition(ClimberPosition position)
     {
-        rightClimberController.setReference(ClimberConstants.kClimberSetpoint, ControlType.kPosition);
-    }
-
-    public void leftDown()
-    {
-        leftClimberController.setReference(0, ControlType.kPosition);
-    }
-
-    public void rightDown()
-    {
-        rightClimberController.setReference(0, ControlType.kPosition);
+        switch (position)
+        {
+            case kUp -> rightClimberController.setReference(ClimberConstants.kClimberSetpoint, ControlType.kPosition);
+            case kDown -> rightClimberController.setReference(0, ControlType.kPosition);
+        }
     }
 
     public void leftIncrement(double increment)
     {
-        double newReference = rightClimberEncoder.getPosition() + increment;
-        newReference = MathUtil.clamp(newReference, ClimberConstants.kClimberSetpoint, 0);
+        if (increment < 0 || increment > ClimberConstants.kClimberSetpoint)
+        {
+            return;
+        }
         
-        leftClimberController.setReference(newReference, ControlType.kPosition);
+        double newSetpoint = leftClimberEncoder.getPosition() + increment;
+        newSetpoint = MathUtil.clamp(newSetpoint, 0, ClimberConstants.kClimberSetpoint);
+
+        leftClimberController.setReference(newSetpoint, ControlType.kPosition);
     }
 
     public void rightIncrement(double increment)
     {
-        double newReference = rightClimberEncoder.getPosition() + increment;
-        newReference = MathUtil.clamp(newReference, 0, ClimberConstants.kClimberSetpoint);
+        if (increment < 0 || increment > ClimberConstants.kClimberSetpoint)
+        {
+            return;
+        }
 
-        rightClimberController.setReference(newReference, ControlType.kPosition);
-    }
+        double newSetpoint = rightClimberEncoder.getPosition() + increment;
+        newSetpoint = MathUtil.clamp(newSetpoint, 0, ClimberConstants.kClimberSetpoint);
 
-    public void bothUp()
-    {
-        leftUp();
-        rightUp();
+        rightClimberController.setReference(newSetpoint, ControlType.kPosition);
     }
 
     public void bothDown()
     {
-        leftDown();
-        rightDown();
+        leftToPosition(ClimberPosition.kDown);
+        rightToPosition(ClimberPosition.kDown);
     }
 
-    @Override
-    public void periodic()
+    public void bothUp()
     {
-        leftEntry.setDouble(leftClimberEncoder.getPosition());
-        rightEntry.setDouble(rightClimberEncoder.getPosition());
-
-        // System.out.println("Left Climber:" + leftClimberEncoder.getPosition());
-        // System.out.println("Right Climber:" + rightClimberEncoder.getPosition());
-    }
-
-    public void test()
-    {
-        leftClimber.set(-.75);
+        leftToPosition(ClimberPosition.kUp);
+        rightToPosition(ClimberPosition.kUp);
     }
 
     private void configMotors()
@@ -115,28 +105,19 @@ public class ClimberSubsystem extends SubsystemBase
         leftClimber.restoreFactoryDefaults();
         rightClimber.restoreFactoryDefaults();
 
-        leftClimber.setIdleMode(IdleMode.kCoast);
-        rightClimber.setIdleMode(IdleMode.kCoast);
-
         leftClimber.setInverted(ClimberConstants.kInvertLeftSide);
         rightClimber.setInverted(ClimberConstants.kInvertRightSide);
 
-        leftClimber.setSmartCurrentLimit(MotorConstants.kAmpLimit);
-        rightClimber.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        leftClimber.setIdleMode(IdleMode.kBrake);
+        rightClimber.setIdleMode(IdleMode.kBrake);
 
-        leftClimberEncoder.setPosition(0);
-        rightClimberEncoder.setPosition(0);
-
-        leftClimberEncoder.setPositionConversionFactor(10);
-        rightClimberEncoder.setPositionConversionFactor(10);
-
-        leftClimberController.setOutputRange(-1, 1);
-        rightClimberController.setOutputRange(1, 1);
+        leftClimberEncoder.setPosition(ClimberConstants.kClimberSetpoint);
+        rightClimberEncoder.setPosition(ClimberConstants.kClimberSetpoint);
 
         leftClimberController.setP(1.0);
         leftClimberController.setI(0.0);
         leftClimberController.setD(0.5);
-
+        
         rightClimberController.setP(1.0);
         rightClimberController.setI(0.0);
         rightClimberController.setD(0.5);
