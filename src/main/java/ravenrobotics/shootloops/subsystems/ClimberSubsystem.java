@@ -1,150 +1,89 @@
-// package ravenrobotics.shootloops.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
-// import com.revrobotics.CANSparkMax;
-// import com.revrobotics.RelativeEncoder;
-// import com.revrobotics.SparkPIDController;
-// import com.revrobotics.CANSparkBase.ControlType;
-// import com.revrobotics.CANSparkBase.IdleMode;
-// import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 
-// import edu.wpi.first.math.MathUtil;
-// import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import ravenrobotics.shootloops.Constants.ClimberConstants;
-// import ravenrobotics.shootloops.Constants.MotorConstants;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import ravenrobotics.shootloops.Constants.ClimberConstants;
 
-// public class ClimberSubsystem extends SubsystemBase 
-// {
-//     private final CANSparkMax leftClimber = new CANSparkMax(ClimberConstants.kLeftClimber, MotorType.kBrushless);
-//     private final RelativeEncoder leftClimberEncoder = leftClimber.getEncoder();
-//     private final SparkPIDController leftClimberController = leftClimber.getPIDController();
+public class ClimberSubsystem extends SubsystemBase 
+{
+    private final TalonSRX leftClimber = new TalonSRX(ClimberConstants.kLeftClimber);
+    private final TalonSRX rightClimber = new TalonSRX(ClimberConstants.kRightClimber);
 
-//     private final CANSparkMax rightClimber = new CANSparkMax(ClimberConstants.kRightClimber, MotorType.kBrushless);
-//     private final RelativeEncoder rightClimberEncoder = rightClimber.getEncoder();
-//     private final SparkPIDController rightClimberController = rightClimber.getPIDController();
+    public enum ClimberDirection
+    {
+        kUp,
+        kDown
+    }
 
-//     public enum ClimberPosition
-//     {
-//         kDown,
-//         kUp
-//     }
+    private static ClimberSubsystem instance;
 
-//     private static ClimberSubsystem instance;
+    public static ClimberSubsystem getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new ClimberSubsystem();
+        }
 
-//     public static ClimberSubsystem getInstance()
-//     {
-//         if (instance == null)
-//         {
-//             instance = new ClimberSubsystem();
-//         }
+        return instance;
+    }
 
-//         return instance;
-//     }
+    private ClimberSubsystem()
+    {
+        configMotors();
+    }
 
-//     private ClimberSubsystem()
-//     {
-//         configMotors();
-//     }
+    public void moveLeft(ClimberDirection direction)
+    {
+        switch (direction)
+        {
+            case kUp -> leftClimber.set(ControlMode.PercentOutput, -.5);
+            case kDown -> leftClimber.set(ControlMode.PercentOutput, .5);
+        }
+    }
 
-//     public void leftToPosition(ClimberPosition position)
-//     {
-//         switch (position)
-//         {
-//             case kUp -> leftClimberController.setReference(ClimberConstants.kClimberSetpoint, ControlType.kPosition);
-//             case kDown -> leftClimberController.setReference(0, ControlType.kPosition);
-//         }
-//     }
+    public void moveRight(ClimberDirection direction)
+    {
+        switch (direction)
+        {
+            case kUp -> rightClimber.set(ControlMode.PercentOutput, .5);
+            case kDown -> rightClimber.set(ControlMode.PercentOutput, -.5);
+        }
+    }
 
-//     public void rightToPosition(ClimberPosition position)
-//     {
-//         switch (position)
-//         {
-//             case kUp -> rightClimberController.setReference(ClimberConstants.kClimberSetpoint, ControlType.kPosition);
-//             case kDown -> rightClimberController.setReference(0, ControlType.kPosition);
-//         }
-//     }
+    public void stopMotors()
+    {
+        leftClimber.set(ControlMode.PercentOutput, 0);
+        rightClimber.set(ControlMode.PercentOutput, 0);
+    }
 
-//     public void leftIncrement(double increment)
-//     {
-//         if (increment < 0 || increment > ClimberConstants.kClimberSetpoint)
-//         {
-//             return;
-//         }
-        
-//         double newSetpoint = leftClimberEncoder.getPosition() + increment;
-//         newSetpoint = MathUtil.clamp(newSetpoint, 0, ClimberConstants.kClimberSetpoint);
+    public void toBrake()
+    {
+        leftClimber.setNeutralMode(NeutralMode.Brake);
+        rightClimber.setNeutralMode(NeutralMode.Brake);
+    }
 
-//         leftClimberController.setReference(newSetpoint, ControlType.kPosition);
-//     }
+    public void toCoast()
+    {
+        leftClimber.setNeutralMode(NeutralMode.Coast);
+        rightClimber.setNeutralMode(NeutralMode.Coast);
+    }
 
-//     public void rightIncrement(double increment)
-//     {
-//         if (increment < 0 || increment > ClimberConstants.kClimberSetpoint)
-//         {
-//             return;
-//         }
+    private void configMotors()
+    {
+        TalonSRXConfiguration motorConfig = new TalonSRXConfiguration();
 
-//         double newSetpoint = rightClimberEncoder.getPosition() + increment;
-//         newSetpoint = MathUtil.clamp(newSetpoint, 0, ClimberConstants.kClimberSetpoint);
+        motorConfig.peakCurrentLimit = 25;
+        motorConfig.peakCurrentDuration = 500;
+        motorConfig.continuousCurrentLimit = 20;
 
-//         rightClimberController.setReference(newSetpoint, ControlType.kPosition);
-//     }
+        leftClimber.configAllSettings(motorConfig);
+        rightClimber.configAllSettings(motorConfig);
 
-//     public void bothDown()
-//     {
-//         leftToPosition(ClimberPosition.kDown);
-//         rightToPosition(ClimberPosition.kDown);
-//     }
-
-//     public void bothUp()
-//     {
-//         leftToPosition(ClimberPosition.kUp);
-//         rightToPosition(ClimberPosition.kUp);
-//     }
-
-//     public void leftDown()
-//     {
-//         leftClimber.set(-.6);
-//     }
-
-//     public void leftUp()
-//     {
-//         leftClimber.set(.6);
-//     }
-
-//     public void rightDown()
-//     {
-//         rightClimber.set(-.6);
-//     }
-
-//     public void rightUp()
-//     {
-//         rightClimber.set(.6);
-//     }
-
-//     public void stopMotors()
-//     {
-//         leftClimber.stopMotor();
-//         rightClimber.stopMotor();
-//     }
-
-//     private void configMotors()
-//     {
-//         leftClimber.restoreFactoryDefaults();
-//         rightClimber.restoreFactoryDefaults();
-
-//         leftClimber.setInverted(ClimberConstants.kInvertLeftSide);
-//         rightClimber.setInverted(ClimberConstants.kInvertRightSide);
-
-//         leftClimber.setSmartCurrentLimit(MotorConstants.kAmpStallLimit, MotorConstants.kAmpFreeLimit);
-//         rightClimber.setSmartCurrentLimit(MotorConstants.kAmpStallLimit, MotorConstants.kAmpFreeLimit);
-
-//         leftClimber.setIdleMode(IdleMode.kCoast);
-//         rightClimber.setIdleMode(IdleMode.kCoast);
-
-//         leftClimberEncoder.setPosition(0);
-//         rightClimberEncoder.setPosition(0);
-
-//         leftClimber.burnFlash();
-//         rightClimber.burnFlash();
-//     }
-// }
+        leftClimber.setNeutralMode(NeutralMode.Coast);
+        rightClimber.setNeutralMode(NeutralMode.Coast);
+    }
+}

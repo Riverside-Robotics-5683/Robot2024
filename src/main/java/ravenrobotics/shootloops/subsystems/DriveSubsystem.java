@@ -115,6 +115,8 @@ public class DriveSubsystem extends SubsystemBase
     private Pose2d drivetrainPose;
     private Field2d fieldData = new Field2d();
 
+    private boolean isClimbing = false;
+
     //Instance object for simplifying getting the subsystem for commands.
     private static DriveSubsystem instance;
 
@@ -204,6 +206,8 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void drive(ChassisSpeeds speeds)
     {
+        if (isClimbing) { return; }
+
         //Debugging
         //System.out.println("Chassis Speeds: " + speeds);
 
@@ -230,6 +234,16 @@ public class DriveSubsystem extends SubsystemBase
         frontRightPower.setDouble(frontRight.get());
         backLeftPower.setDouble(backLeft.get());
         backRightPower.setDouble(backRight.get());
+    }
+
+    public void isClimbing()
+    {
+        isClimbing = true;
+    }
+
+    public void isNotClimbing()
+    {
+        isClimbing = false;
     }
 
     /**

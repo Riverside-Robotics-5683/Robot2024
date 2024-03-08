@@ -19,11 +19,12 @@ import ravenrobotics.shootloops.commands.DriveCommand;
 import ravenrobotics.shootloops.commands.RunFlywheelCommand;
 import ravenrobotics.shootloops.commands.autos.DriveForwardAuto;
 import ravenrobotics.shootloops.commands.autos.ppcommands.*;
-//import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
+import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
 import ravenrobotics.shootloops.subsystems.DriveSubsystem;
 import ravenrobotics.shootloops.subsystems.IMUSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
 import ravenrobotics.shootloops.subsystems.RGBSubsystem;
+import ravenrobotics.shootloops.subsystems.ClimberSubsystem.ClimberDirection;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem.IntakeArmPosition;
 import ravenrobotics.shootloops.subsystems.RGBSubsystem.RGBValues;
 import ravenrobotics.shootloops.util.Telemetry;
@@ -65,7 +66,7 @@ public class RobotContainer
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
 
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
-    
+
     //Configure configured controller bindings.
     configureBindings();
     DriveSubsystem.getInstance().setDefaultCommand(driveCommand);
@@ -79,11 +80,18 @@ public class RobotContainer
 
     driverJoystick.button(1).whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().motorsToBrake(), () -> DriveSubsystem.getInstance().motorsToCoast()));
 
-    // driverJoystick.button(5).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().leftUp(), () -> ClimberSubsystem.getInstance().stopMotors()));
-    // driverJoystick.button(3).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().leftDown(), () -> ClimberSubsystem.getInstance().stopMotors()));
+    driverJoystick.button(5).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
+    driverJoystick.button(3).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
 
-    // driverJoystick.button(6).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().rightUp(), () -> ClimberSubsystem.getInstance().stopMotors()));
-    // driverJoystick.button(4).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().rightDown(), () -> ClimberSubsystem.getInstance().stopMotors()));
+    driverJoystick.button(6).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
+    driverJoystick.button(4).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    driverJoystick.pov(0).whileTrue(new StartEndCommand(() -> {ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp); ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp);}, () -> ClimberSubsystem.getInstance().stopMotors()));
+    driverJoystick.pov(180).whileTrue(new StartEndCommand(() -> {ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown); ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown);}, () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    driverJoystick.button(9).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toBrake(); DriveSubsystem.getInstance().isClimbing();}));
+    driverJoystick.button(10).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toCoast(); DriveSubsystem.getInstance().isNotClimbing();}));
+
     // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
     // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
     // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
