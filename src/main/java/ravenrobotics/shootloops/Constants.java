@@ -1,4 +1,4 @@
-package ravenrobotics.robot;
+package ravenrobotics.shootloops;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
@@ -12,6 +12,12 @@ public class Constants
         public static final int kDriverPort = 0;
         public static final int kSystemsPort = 1;
     }
+    public static class MotorConstants
+    {
+        public static final int kAmpStallLimit = 40;
+        public static final int kAmpFreeLimit = 35;
+    }
+
     //Constants for the drivetrain, like motor IDs and whether they should be inverted.
     public static class DrivetrainConstants
     {
@@ -37,7 +43,6 @@ public class Constants
         /////////////////////
         ///Other Constants///
         /////////////////////
-        //TODO: Find actual speed of the drivetrain, using number from online for now.
         public static final double kDriveMaxSpeedMPS = Units.feetToMeters(13.87);
         //Slew rates.
         public static final double kTranslationSlewRate = 1.5;
@@ -45,9 +50,9 @@ public class Constants
         /////////////////////
         //Encoder Constants//
         /////////////////////
-        public static final double kWheelDiameter = Units.inchesToMeters(6);
-        public static final double kEncoderDistanceConversionFactor = Math.PI * kWheelDiameter * (12 / 72);
-        public static final double kEncoderVelocityConversionFactor = 12 / 72;
+        public static final double kWheelCircumference = Units.inchesToMeters(6) * Math.PI;
+        public static final double kDistanceConversionFactor = kWheelCircumference * (12.0 / 72);
+        public static final double kVelocityConversionFactor = 12.0 / 72;
     }
     //Constants for the Pigeon2 IMU, such as the ID and various configuration settings.
     public static class IMUConstants
@@ -62,7 +67,7 @@ public class Constants
         public static final double kTrimY = 0.0;
         public static final double kTrimZ = 0.0;
         //Mounting position in degrees.
-        public static final double kMountPitch = 0.0;
+        public static final double kMountPitch = -180.0;
         public static final double kMountRoll = 0.0;
         public static final double kMountYaw = 0.0;
         //Whether specific features should be enabled. (keep them to false)
@@ -80,7 +85,7 @@ public class Constants
         public static final double kArmI = 0.0;
         public static final double kArmD = 0.5;
         
-        public static final double kArmDeployedSetpoint = 57.2;
+        public static final double kArmDeployedSetpoint = 58;
 
         public static final double kRollerFF = 1.0;
         public static final double kRollerSetpoint = 4000;
@@ -113,13 +118,13 @@ public class Constants
     public static class KinematicsConstants
     {
         //Offset from the center of the robot to a wheel.
-        public static final double kFrontOffset = Units.inchesToMeters(14.838) / 2;
-        public static final double kBackOffset = Units.inchesToMeters(14.547) / 2;
+        public static final double kWheelBase = Units.inchesToMeters(25.25) / 2;
+        public static final double kTrackWidth = Units.inchesToMeters(15) / 2;
         //Translation2d offsets for each wheel.
-        public static final Translation2d kFrontLeftOffset = new Translation2d(kFrontOffset, kFrontOffset);
-        public static final Translation2d kFrontRightOffset = new Translation2d(kFrontOffset, -kFrontOffset);
-        public static final Translation2d kBackLeftOffset = new Translation2d(-kBackOffset, kBackOffset);
-        public static final Translation2d kBackRightOffset = new Translation2d(-kBackOffset, -kBackOffset);
+        public static final Translation2d kFrontLeftOffset = new Translation2d(kWheelBase, kTrackWidth);
+        public static final Translation2d kFrontRightOffset = new Translation2d(kWheelBase, -kTrackWidth);
+        public static final Translation2d kBackLeftOffset = new Translation2d(-kWheelBase, kTrackWidth);
+        public static final Translation2d kBackRightOffset = new Translation2d(-kWheelBase, -kTrackWidth);
         //Actual kinematics object for performing calculations.
         public static final MecanumDriveKinematics kDriveKinematics = new MecanumDriveKinematics(
             kFrontLeftOffset,

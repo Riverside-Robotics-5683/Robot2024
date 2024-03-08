@@ -1,11 +1,11 @@
-package ravenrobotics.robot.commands;
+package ravenrobotics.shootloops.commands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import ravenrobotics.robot.subsystems.DriveSubsystem;
-import ravenrobotics.robot.subsystems.FlywheelSubsystem;
-import ravenrobotics.robot.subsystems.IntakeSubsystem;
+import ravenrobotics.shootloops.subsystems.DriveSubsystem;
+import ravenrobotics.shootloops.subsystems.FlywheelSubsystem;
+import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
 
 public class RunFlywheelCommand extends Command 
 {
@@ -25,6 +25,7 @@ public class RunFlywheelCommand extends Command
     @Override
     public void initialize()
     {
+        driveSubsystem.motorsToBrake();
     }
 
     @Override
@@ -32,7 +33,12 @@ public class RunFlywheelCommand extends Command
     {
         driveSubsystem.drive(new ChassisSpeeds(0, 0, 0));
         flywheelSubsystem.shootOn();
-        Timer.delay(1);
+        while (flywheelSubsystem.getVelocity() < 7000)
+        {
+            //System.out.println("Velocity:" + flywheelSubsystem.getVelocity());
+            continue;
+        }
+        Timer.delay(0.05);
         intakeSubsystem.runRollers();
     }
 
@@ -41,5 +47,6 @@ public class RunFlywheelCommand extends Command
     {
         flywheelSubsystem.stopFly();
         intakeSubsystem.stopRollers();
+        driveSubsystem.motorsToCoast();
     }
 }

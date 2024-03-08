@@ -1,4 +1,4 @@
-package ravenrobotics.robot.commands;
+package ravenrobotics.shootloops.commands;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -7,10 +7,10 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.Command;
-import ravenrobotics.robot.Constants.DrivetrainConstants;
-import ravenrobotics.robot.subsystems.DriveSubsystem;
-import ravenrobotics.robot.subsystems.IMUSubsystem;
-import ravenrobotics.robot.util.Telemetry;
+import ravenrobotics.shootloops.Constants.DrivetrainConstants;
+import ravenrobotics.shootloops.subsystems.DriveSubsystem;
+import ravenrobotics.shootloops.subsystems.IMUSubsystem;
+import ravenrobotics.shootloops.util.Telemetry;
 
 public class DriveCommand extends Command
 {

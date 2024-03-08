@@ -1,4 +1,4 @@
-package ravenrobotics.robot.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -8,8 +8,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Constants.IMUConstants;
-import ravenrobotics.robot.util.Telemetry;
+import ravenrobotics.shootloops.Constants.IMUConstants;
+import ravenrobotics.shootloops.util.Telemetry;
 
 public class IMUSubsystem extends SubsystemBase 
 {
@@ -61,6 +61,17 @@ public class IMUSubsystem extends SubsystemBase
     }
 
     /**
+     * Get the current acceleration on the X-axis from the IMU.
+     * 
+     * @return The acceleration in Gs as a double.
+     */
+    public double getXSpeed()
+    {
+        var speed = imu.getAccelerationX().refresh().getValueAsDouble();
+        return speed;
+    }
+
+    /**
      * Set the heading of the IMU to zero.
      */
     public void zeroYaw()
@@ -71,6 +82,15 @@ public class IMUSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
+        if(getYaw().getDegrees() > 360.0)
+        {
+            imu.setYaw(getYaw().getDegrees() - 360.0);
+        }
+        else if(getYaw().getDegrees() < -360.0)
+        {
+            imu.setYaw(getYaw().getDegrees() + 360.0);
+        }
+
         //Update IMU heading on Shuffleboard
         imuHeading.setDouble(getYaw().getDegrees());
     }

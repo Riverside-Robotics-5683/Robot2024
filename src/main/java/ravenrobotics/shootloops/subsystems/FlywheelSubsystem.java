@@ -1,13 +1,13 @@
-package ravenrobotics.robot.subsystems;
+package ravenrobotics.shootloops.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.math.controller.BangBangController;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import ravenrobotics.robot.Constants.FlywheelConstants;
+import ravenrobotics.shootloops.Constants.FlywheelConstants;
+import ravenrobotics.shootloops.Constants.MotorConstants;
 
 public class FlywheelSubsystem extends SubsystemBase 
 {
@@ -19,17 +19,8 @@ public class FlywheelSubsystem extends SubsystemBase
     private final RelativeEncoder topMotorEncoder = topMotor.getEncoder();
     private final RelativeEncoder bottomMotorEncoder = bottomMotor.getEncoder();
 
-    //Ramps the speeds FlyWheel to a set velocity when enabled
-    private final BangBangController controller = new BangBangController();
-
     //Allows you to use FlywheelSubsystem in other classes
     private static FlywheelSubsystem instance;
-
-    private final SlewRateLimiter rampLimiter = new SlewRateLimiter(0.5);
-
-    //Tell the flywheel is enabled
-    private boolean isEnabled = false;
-    private boolean isOverride = false;
 
     /**
      * Returns the active instance of the FlyWheelSubSystem.
@@ -48,56 +39,6 @@ public class FlywheelSubsystem extends SubsystemBase
         //Return the instance
         return instance;
     }
-    /**
-     * Enables the flywheel
-     */
-    public void enabled()
-    {
-        isEnabled = true;
-    }
-    /**
-     * Disables the flywheel
-     */
-    public void disabled()
-    {
-        isEnabled = false;
-    }
-
-    public void override()
-    {
-        isOverride = true;
-    }
-   
-    public void unOverride()
-    {
-        isOverride = false;
-    }
-
-    @Override
-    public void periodic(){
-        if(isEnabled && !isOverride){
-            topMotor.set(controller.calculate(topMotorEncoder.getVelocity(), FlywheelConstants.kSetPoint));
-            bottomMotor.set(controller.calculate(bottomMotorEncoder.getVelocity(), FlywheelConstants.kSetPoint));
-        }
-        if (isOverride)
-        {
-            topMotor.set(rampLimiter.calculate(1));
-            bottomMotor.set(rampLimiter.calculate(1));
-        }
-    }
-
-    public void configMotors()
-    {
-        topMotor.restoreFactoryDefaults();
-        bottomMotor.restoreFactoryDefaults();
-
-        topMotor.setInverted(true);
-        bottomMotor.setInverted(true);
-
-        topMotor.burnFlash();
-        bottomMotor.burnFlash();
-    }
-    
 
     public void shootOn() 
     {
@@ -109,5 +50,38 @@ public class FlywheelSubsystem extends SubsystemBase
     {
      topMotor.set(0);
      bottomMotor.set(0);
+    }
+
+    public double getVelocity()
+    {
+        return -(topMotorEncoder.getVelocity() + bottomMotorEncoder.getVelocity() / (double)2);
+    }
+
+    @Override
+    public void periodic(){
+    }
+
+    public void configMotors()
+    {
+        topMotor.restoreFactoryDefaults();
+        bottomMotor.restoreFactoryDefaults();
+
+        topMotor.setInverted(true);
+        bottomMotor.setInverted(true);
+
+        topMotor.setIdleMode(IdleMode.kCoast);
+        bottomMotor.setIdleMode(IdleMode.kCoast);
+
+        topMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+        bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+
+        topMotorEncoder.setPosition(0.0);
+        bottomMotorEncoder.setPosition(0.0);
+
+        topMotorEncoder.setVelocityConversionFactor(3);
+        bottomMotorEncoder.setVelocityConversionFactor(3);
+
+        topMotor.burnFlash();
+        bottomMotor.burnFlash();
     }
 }

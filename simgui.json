@@ -16,7 +16,10 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/Shuffleboard/TeleOp/Drive Command": "String Chooser"
+      "/Shuffleboard/TeleOp/Auto Chooser": "String Chooser",
+      "/Shuffleboard/TeleOp/Drive Command": "String Chooser",
+      "/Shuffleboard/TeleOp/Robot Position": "Field2d",
+      "/Shuffleboard/TeleOp/TeleOp Mode": "String Chooser"
     }
   },
   "NetworkTables Info": {
