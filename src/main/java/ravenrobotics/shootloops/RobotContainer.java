@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import ravenrobotics.shootloops.Constants.DriverStationConstants;
@@ -18,7 +19,7 @@ import ravenrobotics.shootloops.commands.DriveCommand;
 import ravenrobotics.shootloops.commands.RunFlywheelCommand;
 import ravenrobotics.shootloops.commands.autos.DriveForwardAuto;
 import ravenrobotics.shootloops.commands.autos.ppcommands.*;
-import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
+//import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
 import ravenrobotics.shootloops.subsystems.DriveSubsystem;
 import ravenrobotics.shootloops.subsystems.IMUSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
@@ -76,8 +77,13 @@ public class RobotContainer
     driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
     driverJoystick.button(12).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverJoystick.button(9).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothUp()));
-    driverJoystick.button(11).onTrue(new InstantCommand(() -> ClimberSubsystem.getInstance().bothDown()));
+    driverJoystick.button(1).whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().motorsToBrake(), () -> DriveSubsystem.getInstance().motorsToCoast()));
+
+    // driverJoystick.button(5).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().leftUp(), () -> ClimberSubsystem.getInstance().stopMotors()));
+    // driverJoystick.button(3).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().leftDown(), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    // driverJoystick.button(6).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().rightUp(), () -> ClimberSubsystem.getInstance().stopMotors()));
+    // driverJoystick.button(4).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().rightDown(), () -> ClimberSubsystem.getInstance().stopMotors()));
     // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
     // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
     // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
@@ -95,7 +101,8 @@ public class RobotContainer
 
   public void setupTeleop()
   {
-    ClimberSubsystem.getInstance().bothDown();
+    DriveSubsystem.getInstance().motorsToCoast();
+    // ClimberSubsystem.getInstance().bothDown();
   }
 
   private void toggleFieldRelative()
@@ -115,7 +122,8 @@ public class RobotContainer
 
   public Command getAutonomousCommand()
   {
-    ClimberSubsystem.getInstance().bothDown();
+    DriveSubsystem.getInstance().motorsToBrake();
+    //ClimberSubsystem.getInstance().bothDown();
     return autoChooser.getSelected();
   }
 }

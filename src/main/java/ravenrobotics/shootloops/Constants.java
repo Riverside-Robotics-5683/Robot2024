@@ -14,7 +14,8 @@ public class Constants
     }
     public static class MotorConstants
     {
-        public static final int kAmpLimit = 35;
+        public static final int kAmpStallLimit = 40;
+        public static final int kAmpFreeLimit = 35;
     }
 
     //Constants for the drivetrain, like motor IDs and whether they should be inverted.
@@ -119,13 +120,13 @@ public class Constants
     public static class KinematicsConstants
     {
         //Offset from the center of the robot to a wheel.
-        public static final double kFrontOffset = Units.inchesToMeters(14.838) / 2;
-        public static final double kBackOffset = Units.inchesToMeters(14.547) / 2;
+        public static final double kWheelBase = Units.inchesToMeters(25.25) / 2;
+        public static final double kTrackWidth = Units.inchesToMeters(15) / 2;
         //Translation2d offsets for each wheel.
-        public static final Translation2d kFrontLeftOffset = new Translation2d(kFrontOffset, kFrontOffset);
-        public static final Translation2d kFrontRightOffset = new Translation2d(kFrontOffset, -kFrontOffset);
-        public static final Translation2d kBackLeftOffset = new Translation2d(-kBackOffset, kBackOffset);
-        public static final Translation2d kBackRightOffset = new Translation2d(-kBackOffset, -kBackOffset);
+        public static final Translation2d kFrontLeftOffset = new Translation2d(kWheelBase, kTrackWidth);
+        public static final Translation2d kFrontRightOffset = new Translation2d(kWheelBase, -kTrackWidth);
+        public static final Translation2d kBackLeftOffset = new Translation2d(-kWheelBase, kTrackWidth);
+        public static final Translation2d kBackRightOffset = new Translation2d(-kWheelBase, -kTrackWidth);
         //Actual kinematics object for performing calculations.
         public static final MecanumDriveKinematics kDriveKinematics = new MecanumDriveKinematics(
             kFrontLeftOffset,

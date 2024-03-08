@@ -72,8 +72,8 @@ public class FlywheelSubsystem extends SubsystemBase
         topMotor.setIdleMode(IdleMode.kCoast);
         bottomMotor.setIdleMode(IdleMode.kCoast);
 
-        topMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
-        bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        topMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+        bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
         topMotorEncoder.setPosition(0.0);
         bottomMotorEncoder.setPosition(0.0);

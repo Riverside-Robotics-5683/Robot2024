@@ -302,6 +302,22 @@ public class DriveSubsystem extends SubsystemBase
         backRight.stopMotor();
     }
 
+    public void motorsToBrake()
+    {
+        frontLeft.setIdleMode(IdleMode.kBrake);
+        frontRight.setIdleMode(IdleMode.kBrake);
+        backLeft.setIdleMode(IdleMode.kBrake);
+        backRight.setIdleMode(IdleMode.kBrake);
+    }
+
+    public void motorsToCoast()
+    {
+        frontLeft.setIdleMode(IdleMode.kCoast);
+        frontRight.setIdleMode(IdleMode.kCoast);
+        backLeft.setIdleMode(IdleMode.kCoast);
+        backRight.setIdleMode(IdleMode.kCoast);
+    }
+
     /**
      * Get the quasistatic SysID command.
      * 
@@ -358,15 +374,15 @@ public class DriveSubsystem extends SubsystemBase
         backRight.setInverted(DrivetrainConstants.kInvertBackRightSide);
 
         //Set the idle mode to brake so that the robot does a better job of staying in place.
-        frontLeft.setIdleMode(IdleMode.kBrake);
-        frontRight.setIdleMode(IdleMode.kBrake);
-        backLeft.setIdleMode(IdleMode.kBrake);
-        backRight.setIdleMode(IdleMode.kBrake);
+        frontLeft.setIdleMode(IdleMode.kCoast);
+        frontRight.setIdleMode(IdleMode.kCoast);
+        backLeft.setIdleMode(IdleMode.kCoast);
+        backRight.setIdleMode(IdleMode.kCoast);
 
-        frontLeft.setSmartCurrentLimit(MotorConstants.kAmpLimit);
-        frontRight.setSmartCurrentLimit(MotorConstants.kAmpLimit);
-        backLeft.setSmartCurrentLimit(MotorConstants.kAmpLimit);
-        backRight.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        frontLeft.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+        frontRight.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+        backLeft.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+        backRight.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
         frontLeftEncoder.setPosition(0);
         frontRightEncoder.setPosition(0);

@@ -8,7 +8,6 @@ import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
 
 public class AutoShootCommand extends Command
 {
-    private final DriveSubsystem driveSubsystem;
     private final IntakeSubsystem intakeSubsystem;
     private final FlywheelSubsystem flywheelSubsystem;
 
@@ -16,11 +15,10 @@ public class AutoShootCommand extends Command
 
     public AutoShootCommand()
     {
-        this.driveSubsystem = DriveSubsystem.getInstance();
         this.intakeSubsystem = IntakeSubsystem.getInstance();
         this.flywheelSubsystem = FlywheelSubsystem.getInstance();
 
-        addRequirements(driveSubsystem, intakeSubsystem, flywheelSubsystem);
+        addRequirements(intakeSubsystem, flywheelSubsystem);
     }
 
     @Override

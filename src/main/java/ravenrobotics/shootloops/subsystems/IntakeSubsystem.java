@@ -147,8 +147,8 @@ public class IntakeSubsystem extends SubsystemBase
         rollerMotor.setIdleMode(IdleMode.kCoast);
         armMotor.setIdleMode(IdleMode.kBrake);
 
-        rollerMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
-        armMotor.setSmartCurrentLimit(MotorConstants.kAmpLimit);
+        rollerMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
+        armMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
         armMotor.setClosedLoopRampRate(0.01);
         armPIDController.setFeedbackDevice(armMotorEncoder);
