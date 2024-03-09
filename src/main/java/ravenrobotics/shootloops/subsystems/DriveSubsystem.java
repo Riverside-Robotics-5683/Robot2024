@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
+import org.photonvision.PhotonCamera;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -13,6 +15,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
@@ -114,6 +117,9 @@ public class DriveSubsystem extends SubsystemBase
     private MecanumDriveOdometry driveOdometry;
     private Pose2d drivetrainPose;
     private Field2d fieldData = new Field2d();
+
+    private MecanumDrivePoseEstimator pvPose;
+    private PhotonCamera pvCamera;
 
     private boolean isClimbing = false;
 
@@ -354,6 +360,11 @@ public class DriveSubsystem extends SubsystemBase
         return sysIDRoutine.dynamic(direction);
     }
 
+    private void updateVisionPose()
+    {
+        
+    }
+
     @Override
     public void periodic()
     {
@@ -365,6 +376,8 @@ public class DriveSubsystem extends SubsystemBase
             IMUSubsystem.getInstance().getYaw(),
             getWheelPositions()
         );
+
+
 
         //Update the robot pose on the field widget.
         fieldData.setRobotPose(drivetrainPose);
