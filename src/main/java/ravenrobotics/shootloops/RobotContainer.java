@@ -7,16 +7,19 @@ package ravenrobotics.shootloops;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import ravenrobotics.shootloops.Constants.DriverStationConstants;
 import ravenrobotics.shootloops.commands.DriveCommand;
 import ravenrobotics.shootloops.commands.RunFlywheelCommand;
+import ravenrobotics.shootloops.commands.autos.DriveForCommand;
 import ravenrobotics.shootloops.commands.autos.DriveForwardAuto;
 import ravenrobotics.shootloops.commands.autos.ppcommands.*;
 import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
@@ -42,7 +45,17 @@ public class RobotContainer
 
   private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
 
-  private final SendableChooser<Command> autoChooser;
+  private final SequentialCommandGroup driveOutAutoRight = new SequentialCommandGroup(
+    new AutoShootCommand(),
+    new DriveForCommand(2, 0.05, 5)
+  );
+
+  private final SequentialCommandGroup driveOutAutoLeft = new SequentialCommandGroup(
+    new AutoShootCommand(),
+    new DriveForCommand(2, -0.05, 5)
+  );
+
+  private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   //Main drive command.
   private final DriveCommand driveCommand = new DriveCommand(
@@ -61,9 +74,11 @@ public class RobotContainer
 
     RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
 
-    autoChooser = AutoBuilder.buildAutoChooser();
+    //autoChooser = AutoBuilder.buildAutoChooser();
 
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
+    autoChooser.addOption("Shoot then Drive Out Right", driveOutAutoRight);
+    autoChooser.addOption("Shoot then Drive Out Left", driveOutAutoLeft);
 
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 
@@ -89,7 +104,7 @@ public class RobotContainer
     driverJoystick.pov(0).whileTrue(new StartEndCommand(() -> {ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp); ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp);}, () -> ClimberSubsystem.getInstance().stopMotors()));
     driverJoystick.pov(180).whileTrue(new StartEndCommand(() -> {ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown); ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown);}, () -> ClimberSubsystem.getInstance().stopMotors()));
 
-    driverJoystick.button(9).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toBrake(); DriveSubsystem.getInstance().isClimbing();}));
+    driverJoystick.button(9).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toBrake(); DriveSubsystem.getInstance().drive(new ChassisSpeeds(0, 0, 0)); DriveSubsystem.getInstance().isClimbing();}));
     driverJoystick.button(10).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toCoast(); DriveSubsystem.getInstance().isNotClimbing();}));
 
     // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));

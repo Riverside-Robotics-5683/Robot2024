@@ -7,6 +7,7 @@ import com.ctre.phoenix6.sim.Pigeon2SimState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.IMUConstants;
 import ravenrobotics.shootloops.util.Telemetry;
@@ -20,7 +21,8 @@ public class IMUSubsystem extends SubsystemBase
     private static IMUSubsystem instance;
 
     //Shuffleboard (telemetry)
-    private GenericEntry imuHeading = Telemetry.teleopTab.add("IMU Heading", 0).getEntry();
+    private GenericEntry imuHeading = Telemetry.teleopTab.add("IMU Heading", 0)
+        .withWidget(BuiltInWidgets.kGyro).getEntry();
 
     private Pigeon2SimState simIMU = imu.getSimState();
 

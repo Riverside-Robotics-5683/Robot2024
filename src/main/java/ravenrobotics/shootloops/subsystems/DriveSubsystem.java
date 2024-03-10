@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
-import org.photonvision.PhotonCamera;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -15,7 +14,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
-import edu.wpi.first.math.estimator.MecanumDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
@@ -53,18 +51,18 @@ public class DriveSubsystem extends SubsystemBase
     private final RelativeEncoder backLeftEncoder = backLeft.getEncoder();
     private final RelativeEncoder backRightEncoder = backRight.getEncoder();
 
-    ///Shuffleboard (telemetry)
-    //Target speeds
-    private GenericEntry frontLeftTargetSpeed = Telemetry.teleopTab.add("FL Target Speed", 0).getEntry();
-    private GenericEntry frontRightTargetSpeed = Telemetry.teleopTab.add("FR Target Speed", 0).getEntry();
-    private GenericEntry backLeftTargetSpeed = Telemetry.teleopTab.add("BL Target Speed", 0).getEntry();
-    private GenericEntry backRightTargetSpeed = Telemetry.teleopTab.add("BR Target Speed", 0).getEntry();
+    // ///Shuffleboard (telemetry)
+    // //Target speeds
+    // private GenericEntry frontLeftTargetSpeed = Telemetry.teleopTab.add("FL Target Speed", 0).getEntry();
+    // private GenericEntry frontRightTargetSpeed = Telemetry.teleopTab.add("FR Target Speed", 0).getEntry();
+    // private GenericEntry backLeftTargetSpeed = Telemetry.teleopTab.add("BL Target Speed", 0).getEntry();
+    // private GenericEntry backRightTargetSpeed = Telemetry.teleopTab.add("BR Target Speed", 0).getEntry();
 
-    //Target power
-    private GenericEntry frontLeftPower = Telemetry.teleopTab.add("FL Power", 0).getEntry();
-    private GenericEntry frontRightPower = Telemetry.teleopTab.add("FR Power", 0).getEntry();
-    private GenericEntry backLeftPower = Telemetry.teleopTab.add("BL Power", 0).getEntry();
-    private GenericEntry backRightPower = Telemetry.teleopTab.add("BR Power", 0).getEntry();
+    // //Target power
+    // private GenericEntry frontLeftPower = Telemetry.teleopTab.add("FL Power", 0).getEntry();
+    // private GenericEntry frontRightPower = Telemetry.teleopTab.add("FR Power", 0).getEntry();
+    // private GenericEntry backLeftPower = Telemetry.teleopTab.add("BL Power", 0).getEntry();
+    // private GenericEntry backRightPower = Telemetry.teleopTab.add("BR Power", 0).getEntry();
     
     //Battery voltage
     private GenericEntry batteryVoltage = Telemetry.teleopTab.add("Battery Voltage", 12).getEntry();
@@ -117,9 +115,6 @@ public class DriveSubsystem extends SubsystemBase
     private MecanumDriveOdometry driveOdometry;
     private Pose2d drivetrainPose;
     private Field2d fieldData = new Field2d();
-
-    private MecanumDrivePoseEstimator pvPose;
-    private PhotonCamera pvCamera;
 
     private boolean isClimbing = false;
 
@@ -230,16 +225,16 @@ public class DriveSubsystem extends SubsystemBase
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backRight.set(wheelSpeeds.rearRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
 
-        //Update Shuffleboard with all the target speeds.
-        frontLeftTargetSpeed.setDouble(wheelSpeeds.frontLeftMetersPerSecond);
-        frontRightTargetSpeed.setDouble(wheelSpeeds.frontRightMetersPerSecond);
-        backLeftTargetSpeed.setDouble(wheelSpeeds.rearLeftMetersPerSecond);
-        backRightTargetSpeed.setDouble(wheelSpeeds.rearRightMetersPerSecond);
-        //Update Shuffleboard with powers.
-        frontLeftPower.setDouble(frontLeft.get());
-        frontRightPower.setDouble(frontRight.get());
-        backLeftPower.setDouble(backLeft.get());
-        backRightPower.setDouble(backRight.get());
+        // //Update Shuffleboard with all the target speeds.
+        // frontLeftTargetSpeed.setDouble(wheelSpeeds.frontLeftMetersPerSecond);
+        // frontRightTargetSpeed.setDouble(wheelSpeeds.frontRightMetersPerSecond);
+        // backLeftTargetSpeed.setDouble(wheelSpeeds.rearLeftMetersPerSecond);
+        // backRightTargetSpeed.setDouble(wheelSpeeds.rearRightMetersPerSecond);
+        // //Update Shuffleboard with powers.
+        // frontLeftPower.setDouble(frontLeft.get());
+        // frontRightPower.setDouble(frontRight.get());
+        // backLeftPower.setDouble(backLeft.get());
+        // backRightPower.setDouble(backRight.get());
     }
 
     public void isClimbing()
@@ -360,11 +355,6 @@ public class DriveSubsystem extends SubsystemBase
         return sysIDRoutine.dynamic(direction);
     }
 
-    private void updateVisionPose()
-    {
-        
-    }
-
     @Override
     public void periodic()
     {
@@ -416,15 +406,15 @@ public class DriveSubsystem extends SubsystemBase
         backLeftEncoder.setPosition(0);
         backRightEncoder.setPosition(0);
 
-        frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
-        frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
-        backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
-        backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kDistanceConversionFactor);
+        frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
 
-        frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
-        frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
-        backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
-        backRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kVelocityConversionFactor);
+        frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
+        backRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
 
         //Save the configuration to the motors.
         frontLeft.burnFlash();

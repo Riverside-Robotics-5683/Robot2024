@@ -40,8 +40,8 @@ public class ClimberSubsystem extends SubsystemBase
     {
         switch (direction)
         {
-            case kUp -> leftClimber.set(ControlMode.PercentOutput, -.5);
-            case kDown -> leftClimber.set(ControlMode.PercentOutput, .5);
+            case kUp -> leftClimber.set(ControlMode.PercentOutput, -.75);
+            case kDown -> leftClimber.set(ControlMode.PercentOutput, .75);
         }
     }
 
@@ -49,8 +49,8 @@ public class ClimberSubsystem extends SubsystemBase
     {
         switch (direction)
         {
-            case kUp -> rightClimber.set(ControlMode.PercentOutput, .5);
-            case kDown -> rightClimber.set(ControlMode.PercentOutput, -.5);
+            case kUp -> rightClimber.set(ControlMode.PercentOutput, .75);
+            case kDown -> rightClimber.set(ControlMode.PercentOutput, -.75);
         }
     }
 
@@ -76,9 +76,9 @@ public class ClimberSubsystem extends SubsystemBase
     {
         TalonSRXConfiguration motorConfig = new TalonSRXConfiguration();
 
-        motorConfig.peakCurrentLimit = 25;
+        motorConfig.peakCurrentLimit = 30;
         motorConfig.peakCurrentDuration = 500;
-        motorConfig.continuousCurrentLimit = 20;
+        motorConfig.continuousCurrentLimit = 25;
 
         leftClimber.configAllSettings(motorConfig);
         rightClimber.configAllSettings(motorConfig);

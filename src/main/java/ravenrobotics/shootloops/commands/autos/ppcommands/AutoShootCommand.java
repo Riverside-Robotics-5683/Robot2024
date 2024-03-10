@@ -29,6 +29,10 @@ public class AutoShootCommand extends Command
     @Override
     public void execute()
     {
+        // while (!intakeSubsystem.waitForIntake())
+        // {
+        //     continue;
+        // }
         while (flywheelSubsystem.getVelocity() < 7000)
         {
             continue;

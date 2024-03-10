@@ -26,14 +26,14 @@ public class DriveCommand extends Command
     //Limiters so we don't break the chassis by instantly applying power.
     private final SlewRateLimiter xLimiter, yLimiter, tLimiter;
 
-    //Axis entries.
-    private final GenericEntry xAxisEntry = Telemetry.teleopTab.add("X Axis", 0).getEntry();
-    private final GenericEntry yAxisEntry = Telemetry.teleopTab.add("Y Axis", 0).getEntry();
-    private final GenericEntry zAxisEntry = Telemetry.teleopTab.add("Z Axis", 0).getEntry();
-    //Axis filter entries.
-    private final GenericEntry xAxisFilterEntry = Telemetry.teleopTab.add("X Axis Filter", 0).getEntry();
-    private final GenericEntry yAxisFilterEntry = Telemetry.teleopTab.add("Y Axis Filter", 0).getEntry();
-    private final GenericEntry zAxisFilterEntry = Telemetry.teleopTab.add("Z Axis Filter", 0).getEntry();
+    // //Axis entries.
+    // private final GenericEntry xAxisEntry = Telemetry.teleopTab.add("X Axis", 0).getEntry();
+    // private final GenericEntry yAxisEntry = Telemetry.teleopTab.add("Y Axis", 0).getEntry();
+    // private final GenericEntry zAxisEntry = Telemetry.teleopTab.add("Z Axis", 0).getEntry();
+    // //Axis filter entries.
+    // private final GenericEntry xAxisFilterEntry = Telemetry.teleopTab.add("X Axis Filter", 0).getEntry();
+    // private final GenericEntry yAxisFilterEntry = Telemetry.teleopTab.add("Y Axis Filter", 0).getEntry();
+    // private final GenericEntry zAxisFilterEntry = Telemetry.teleopTab.add("Z Axis Filter", 0).getEntry();
 
     /**
      * Command to drive the robot using joystick axes.
@@ -78,10 +78,10 @@ public class DriveCommand extends Command
         //Temporary variables for the speeds.
         double xSpeedMPS, ySpeedMPS, tSpeedMPS;
 
-        //Update the axis data on Shuffleboard.
-        xAxisEntry.setDouble(xSpeed.getAsDouble());
-        yAxisEntry.setDouble(ySpeed.getAsDouble());
-        zAxisEntry.setDouble(tSpeed.getAsDouble());
+        // //Update the axis data on Shuffleboard.
+        // xAxisEntry.setDouble(xSpeed.getAsDouble());
+        // yAxisEntry.setDouble(ySpeed.getAsDouble());
+        // zAxisEntry.setDouble(tSpeed.getAsDouble());
 
         //Get the target strafe, forward/backward, and rotation speeds.
         xSpeedMPS = xLimiter.calculate(xSpeed.getAsDouble()) * DrivetrainConstants.kDriveMaxSpeedMPS;
@@ -106,10 +106,10 @@ public class DriveCommand extends Command
             tSpeedMPS = 0;
         }
 
-        //Update the filter data on Shuffleboard.
-        xAxisFilterEntry.setDouble(xLimiter.lastValue());
-        yAxisFilterEntry.setDouble(yLimiter.lastValue());
-        zAxisFilterEntry.setDouble(tLimiter.lastValue());
+        // //Update the filter data on Shuffleboard.
+        // xAxisFilterEntry.setDouble(xLimiter.lastValue());
+        // yAxisFilterEntry.setDouble(yLimiter.lastValue());
+        // zAxisFilterEntry.setDouble(tLimiter.lastValue());
 
         //Convert the target speeds to a chassis speed.
         ChassisSpeeds targetSpeeds = new ChassisSpeeds(xSpeedMPS, ySpeedMPS, tSpeedMPS);
