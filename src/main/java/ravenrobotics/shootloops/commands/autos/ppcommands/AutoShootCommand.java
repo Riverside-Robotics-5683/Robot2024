@@ -37,7 +37,7 @@ public class AutoShootCommand extends Command
         {
             continue;
         }
-        intakeSubsystem.runRollers();
+        intakeSubsystem.runRollersFlywheel();
         Timer.delay(1.5);
         isDone = true;
     }

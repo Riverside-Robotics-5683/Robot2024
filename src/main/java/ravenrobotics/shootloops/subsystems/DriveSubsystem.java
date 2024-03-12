@@ -15,6 +15,7 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
@@ -117,6 +118,7 @@ public class DriveSubsystem extends SubsystemBase
     private Field2d fieldData = new Field2d();
 
     private boolean isClimbing = false;
+    private Translation2d centerOfRotation = new Translation2d();
 
     //Instance object for simplifying getting the subsystem for commands.
     private static DriveSubsystem instance;
@@ -209,32 +211,25 @@ public class DriveSubsystem extends SubsystemBase
     {
         if (isClimbing) { return; }
 
-        //Debugging
-        //System.out.println("Chassis Speeds: " + speeds);
-
         //Convert the ChassisSpeeds to individual wheel speeds.
-        MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds);
+        MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds, centerOfRotation);
         wheelSpeeds.desaturate(DrivetrainConstants.kDriveMaxSpeedMPS);
-
-        //Debugging
-        //System.out.println("Wheel Speeds: " + wheelSpeeds);
         
         //Convert the speeds into the range for the motors, then set them.
         frontLeft.set(wheelSpeeds.frontLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         frontRight.set(wheelSpeeds.frontRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backRight.set(wheelSpeeds.rearRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+    }
 
-        // //Update Shuffleboard with all the target speeds.
-        // frontLeftTargetSpeed.setDouble(wheelSpeeds.frontLeftMetersPerSecond);
-        // frontRightTargetSpeed.setDouble(wheelSpeeds.frontRightMetersPerSecond);
-        // backLeftTargetSpeed.setDouble(wheelSpeeds.rearLeftMetersPerSecond);
-        // backRightTargetSpeed.setDouble(wheelSpeeds.rearRightMetersPerSecond);
-        // //Update Shuffleboard with powers.
-        // frontLeftPower.setDouble(frontLeft.get());
-        // frontRightPower.setDouble(frontRight.get());
-        // backLeftPower.setDouble(backLeft.get());
-        // backRightPower.setDouble(backRight.get());
+    public void setCenterOfRotation(Translation2d centerOfRotation)
+    {
+        this.centerOfRotation = centerOfRotation;
+    }
+
+    public void resetCenterofRotation()
+    {
+        this.centerOfRotation = new Translation2d();
     }
 
     public void isClimbing()
@@ -393,8 +388,8 @@ public class DriveSubsystem extends SubsystemBase
         //Set the idle mode to brake so that the robot does a better job of staying in place.
         frontLeft.setIdleMode(IdleMode.kCoast);
         frontRight.setIdleMode(IdleMode.kCoast);
-        backLeft.setIdleMode(IdleMode.kCoast);
-        backRight.setIdleMode(IdleMode.kCoast);
+        backLeft.setIdleMode(IdleMode.kBrake);
+        backRight.setIdleMode(IdleMode.kBrake);
 
         frontLeft.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         frontRight.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);

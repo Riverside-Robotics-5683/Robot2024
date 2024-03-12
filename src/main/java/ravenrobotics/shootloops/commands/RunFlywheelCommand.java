@@ -38,8 +38,8 @@ public class RunFlywheelCommand extends Command
             //System.out.println("Velocity:" + flywheelSubsystem.getVelocity());
             continue;
         }
-        Timer.delay(0.05);
-        intakeSubsystem.runRollers();
+        Timer.delay(0.1);
+        intakeSubsystem.runRollersFlywheel();
     }
 
     @Override

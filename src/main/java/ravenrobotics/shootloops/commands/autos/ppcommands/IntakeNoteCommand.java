@@ -40,7 +40,7 @@ public class IntakeNoteCommand extends Command
 
         mode = 1;
 
-        intakeSubsystem.intakeRunRollers();
+        intakeSubsystem.runRollersIntake();
 
         driveSubsystem.drive(new ChassisSpeeds(1, 0, 0));
 

@@ -12,6 +12,7 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.IntakeConstants;
 import ravenrobotics.shootloops.Constants.MotorConstants;
@@ -43,6 +44,34 @@ public class IntakeSubsystem extends SubsystemBase
         kDeployed,
         kRetracted
     }
+
+    public Command intakeRoutineCommand = new Command() 
+    {
+        @Override
+        public void initialize()
+        {
+            setIntakePosition(IntakeArmPosition.kDeployed);
+        }
+
+        @Override
+        public void execute()
+        {
+            runRollersIntake();
+        }
+
+        @Override
+        public void end(boolean isInterrupted)
+        {
+            stopRollers();
+            setIntakePosition(IntakeArmPosition.kRetracted);
+        }
+
+        @Override
+        public boolean isFinished()
+        {
+            return getDistanceSensor();
+        }
+    };
 
     /**
      * Returns the active instance of the IntakeSubsystem.
@@ -98,13 +127,13 @@ public class IntakeSubsystem extends SubsystemBase
         return isReference;
     }
 
-    public void runRollers()
+    public void runRollersFlywheel()
     {
         //changed because rollers were super speedy
         rollerMotor.set(1);
     }
 
-    public void intakeRunRollers()
+    public void runRollersIntake()
     {
         rollerMotor.set(-0.75);
     }

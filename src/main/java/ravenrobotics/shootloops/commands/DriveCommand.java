@@ -5,7 +5,6 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj2.command.Command;
 import ravenrobotics.shootloops.Constants.DrivetrainConstants;
 import ravenrobotics.shootloops.subsystems.DriveSubsystem;
@@ -25,15 +24,6 @@ public class DriveCommand extends Command
 
     //Limiters so we don't break the chassis by instantly applying power.
     private final SlewRateLimiter xLimiter, yLimiter, tLimiter;
-
-    // //Axis entries.
-    // private final GenericEntry xAxisEntry = Telemetry.teleopTab.add("X Axis", 0).getEntry();
-    // private final GenericEntry yAxisEntry = Telemetry.teleopTab.add("Y Axis", 0).getEntry();
-    // private final GenericEntry zAxisEntry = Telemetry.teleopTab.add("Z Axis", 0).getEntry();
-    // //Axis filter entries.
-    // private final GenericEntry xAxisFilterEntry = Telemetry.teleopTab.add("X Axis Filter", 0).getEntry();
-    // private final GenericEntry yAxisFilterEntry = Telemetry.teleopTab.add("Y Axis Filter", 0).getEntry();
-    // private final GenericEntry zAxisFilterEntry = Telemetry.teleopTab.add("Z Axis Filter", 0).getEntry();
 
     /**
      * Command to drive the robot using joystick axes.
@@ -88,19 +78,19 @@ public class DriveCommand extends Command
         ySpeedMPS = yLimiter.calculate(ySpeed.getAsDouble()) * DrivetrainConstants.kDriveMaxSpeedMPS;
         tSpeedMPS = tLimiter.calculate(tSpeed.getAsDouble()) * DrivetrainConstants.kDriveMaxSpeedMPS;
 
-        if (Math.abs(xSpeed.getAsDouble()) < 0.1)
+        if (Math.abs(xSpeed.getAsDouble()) < 0.04)
         {
             xLimiter.reset(0);
             xSpeedMPS = 0;
         }
         
-        if (Math.abs(ySpeed.getAsDouble()) < 0.1)
+        if (Math.abs(ySpeed.getAsDouble()) < 0.04)
         {
             yLimiter.reset(0);
             ySpeedMPS = 0;
         }
 
-        if (Math.abs(tSpeed.getAsDouble()) < 0.1)
+        if (Math.abs(tSpeed.getAsDouble()) < 0.04)
         {
             tLimiter.reset(0);
             tSpeedMPS = 0;
