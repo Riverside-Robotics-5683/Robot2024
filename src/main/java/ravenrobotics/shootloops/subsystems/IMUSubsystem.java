@@ -73,6 +73,18 @@ public class IMUSubsystem extends SubsystemBase
         return speed;
     }
 
+    public double getYSpeed()
+    {
+        var speed = imu.getAccelerationY().refresh().getValueAsDouble();
+        return speed;
+    }
+    
+    public double getZSpeed()
+    {
+        var speed = imu.getAccelerationZ().refresh().getValueAsDouble();
+        return speed;
+    }
+
     /**
      * Set the heading of the IMU to zero.
      */
@@ -94,7 +106,7 @@ public class IMUSubsystem extends SubsystemBase
         }
 
         //Update IMU heading on Shuffleboard
-        imuHeading.setDouble(getYaw().getDegrees());
+        imuHeading.setDouble(-getYaw().getDegrees());
     }
 
     /**

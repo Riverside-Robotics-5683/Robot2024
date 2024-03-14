@@ -33,7 +33,7 @@ public class RunFlywheelCommand extends Command
     {
         driveSubsystem.drive(new ChassisSpeeds(0, 0, 0));
         flywheelSubsystem.shootOn();
-        while (flywheelSubsystem.getVelocity() < 7000)
+        while (flywheelSubsystem.getVelocity() < 8500)
         {
             //System.out.println("Velocity:" + flywheelSubsystem.getVelocity());
             continue;

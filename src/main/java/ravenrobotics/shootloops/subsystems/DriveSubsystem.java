@@ -26,6 +26,11 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.MutableMeasure;
 import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -51,19 +56,6 @@ public class DriveSubsystem extends SubsystemBase
     private final RelativeEncoder frontRightEncoder = frontRight.getEncoder();
     private final RelativeEncoder backLeftEncoder = backLeft.getEncoder();
     private final RelativeEncoder backRightEncoder = backRight.getEncoder();
-
-    // ///Shuffleboard (telemetry)
-    // //Target speeds
-    // private GenericEntry frontLeftTargetSpeed = Telemetry.teleopTab.add("FL Target Speed", 0).getEntry();
-    // private GenericEntry frontRightTargetSpeed = Telemetry.teleopTab.add("FR Target Speed", 0).getEntry();
-    // private GenericEntry backLeftTargetSpeed = Telemetry.teleopTab.add("BL Target Speed", 0).getEntry();
-    // private GenericEntry backRightTargetSpeed = Telemetry.teleopTab.add("BR Target Speed", 0).getEntry();
-
-    // //Target power
-    // private GenericEntry frontLeftPower = Telemetry.teleopTab.add("FL Power", 0).getEntry();
-    // private GenericEntry frontRightPower = Telemetry.teleopTab.add("FR Power", 0).getEntry();
-    // private GenericEntry backLeftPower = Telemetry.teleopTab.add("BL Power", 0).getEntry();
-    // private GenericEntry backRightPower = Telemetry.teleopTab.add("BR Power", 0).getEntry();
     
     //Battery voltage
     private GenericEntry batteryVoltage = Telemetry.teleopTab.add("Battery Voltage", 12).getEntry();
@@ -113,12 +105,26 @@ public class DriveSubsystem extends SubsystemBase
         sysIDMechanism);
 
     //Odometry-related things.
-    private MecanumDriveOdometry driveOdometry;
+    private final MecanumDriveOdometry driveOdometry;
     private Pose2d drivetrainPose;
     private Field2d fieldData = new Field2d();
 
     private boolean isClimbing = false;
     private Translation2d centerOfRotation = new Translation2d();
+
+    private boolean isBrakeMode = false;
+
+    private final GenericEntry brakeModeEntry = Telemetry.teleopTab.add("Brake Mode", false).getEntry();
+
+    private final DataLog log;
+
+    private final DoubleLogEntry frontLeftSpeed;
+    private final DoubleLogEntry frontRightSpeed;
+    private final DoubleLogEntry backLeftSpeed;
+    private final DoubleLogEntry backRightSpeed;
+
+    private final StringLogEntry chassisSpeedsLog;
+    private final DoubleArrayLogEntry imuSpeedsLog;
 
     //Instance object for simplifying getting the subsystem for commands.
     private static DriveSubsystem instance;
@@ -155,6 +161,16 @@ public class DriveSubsystem extends SubsystemBase
 
         //Add the Field2d widget to Shuffleboard so we can see the robot's position.
         Telemetry.teleopTab.add("Robot Position", fieldData);
+
+        log = DataLogManager.getLog();
+
+        frontLeftSpeed = new DoubleLogEntry(log, "/drive/fLSpeed");
+        frontRightSpeed = new DoubleLogEntry(log, "/drive/fRSpeed");
+        backLeftSpeed = new DoubleLogEntry(log, "/drive/bLSpeed");
+        backRightSpeed = new DoubleLogEntry(log, "/drive/bRSpeed");
+
+        chassisSpeedsLog = new StringLogEntry(log, "/drive/chassisSpeed");
+        imuSpeedsLog = new DoubleArrayLogEntry(log, "/imu/imuSpeeds");
     }
 
     /**
@@ -209,7 +225,18 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void drive(ChassisSpeeds speeds)
     {
-        if (isClimbing) { return; }
+        if (isClimbing) return;
+
+        if (Math.abs(speeds.omegaRadiansPerSecond) > Math.abs(speeds.vxMetersPerSecond) && Math.abs(speeds.omegaRadiansPerSecond) > Math.abs(speeds.vyMetersPerSecond))
+        {
+            isBrakeMode = true;
+            motorsToBrake();
+        }
+        else
+        {
+            isBrakeMode = false;
+            motorsToCoast();
+        }
 
         //Convert the ChassisSpeeds to individual wheel speeds.
         MecanumDriveWheelSpeeds wheelSpeeds = KinematicsConstants.kDriveKinematics.toWheelSpeeds(speeds, centerOfRotation);
@@ -220,6 +247,12 @@ public class DriveSubsystem extends SubsystemBase
         frontRight.set(wheelSpeeds.frontRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backRight.set(wheelSpeeds.rearRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+
+        //Log the individual wheel speeds to the log.
+        frontLeftSpeed.append(wheelSpeeds.frontLeftMetersPerSecond);
+        frontRightSpeed.append(wheelSpeeds.frontRightMetersPerSecond);
+        backLeftSpeed.append(wheelSpeeds.rearLeftMetersPerSecond);
+        backRightSpeed.append(wheelSpeeds.rearRightMetersPerSecond);
     }
 
     public void setCenterOfRotation(Translation2d centerOfRotation)
@@ -257,7 +290,8 @@ public class DriveSubsystem extends SubsystemBase
             backRightEncoder.getVelocity()
         );
 
-        return KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
+        ChassisSpeeds chassisSpeeds = KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
+        return chassisSpeeds;
     }
 
     /**
@@ -314,6 +348,8 @@ public class DriveSubsystem extends SubsystemBase
 
     public void motorsToBrake()
     {
+        isBrakeMode = true;
+
         frontLeft.setIdleMode(IdleMode.kBrake);
         frontRight.setIdleMode(IdleMode.kBrake);
         backLeft.setIdleMode(IdleMode.kBrake);
@@ -322,6 +358,8 @@ public class DriveSubsystem extends SubsystemBase
 
     public void motorsToCoast()
     {
+        isBrakeMode = false;
+
         frontLeft.setIdleMode(IdleMode.kCoast);
         frontRight.setIdleMode(IdleMode.kCoast);
         backLeft.setIdleMode(IdleMode.kCoast);
@@ -356,13 +394,30 @@ public class DriveSubsystem extends SubsystemBase
         //Update the battery voltage on telemetry.
         batteryVoltage.setDouble(RobotController.getBatteryVoltage());
 
+        double[] imuSpeeds = {IMUSubsystem.getInstance().getXSpeed(), IMUSubsystem.getInstance().getYSpeed(), IMUSubsystem.getInstance().getZSpeed()};
+
+        imuSpeedsLog.append(imuSpeeds);
+
+        // if (Math.abs(imuSpeeds[2]) > Math.abs(imuSpeeds[0]) && Math.abs(imuSpeeds[2]) > Math.abs(imuSpeeds[1]))
+        // {
+        //     //System.out.println("Brake mode on");
+        //     motorsToBrake();
+        // }
+        // else
+        // {
+        //     //System.out.println("Brake mode off");
+        //     motorsToCoast();
+        // }
+
+        brakeModeEntry.setBoolean(isBrakeMode);
+
         //Update the odometry.
         drivetrainPose = driveOdometry.update(
             IMUSubsystem.getInstance().getYaw(),
             getWheelPositions()
         );
 
-
+        chassisSpeedsLog.append(getRobotSpeed().toString());
 
         //Update the robot pose on the field widget.
         fieldData.setRobotPose(drivetrainPose);
@@ -388,8 +443,8 @@ public class DriveSubsystem extends SubsystemBase
         //Set the idle mode to brake so that the robot does a better job of staying in place.
         frontLeft.setIdleMode(IdleMode.kCoast);
         frontRight.setIdleMode(IdleMode.kCoast);
-        backLeft.setIdleMode(IdleMode.kBrake);
-        backRight.setIdleMode(IdleMode.kBrake);
+        backLeft.setIdleMode(IdleMode.kCoast);
+        backRight.setIdleMode(IdleMode.kCoast);
 
         frontLeft.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         frontRight.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);

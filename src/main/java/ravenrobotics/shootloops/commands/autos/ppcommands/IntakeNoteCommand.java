@@ -27,7 +27,7 @@ public class IntakeNoteCommand extends Command
     @Override
     public void initialize()
     {
-        intakeSubsystem.setIntakePosition(IntakeArmPosition.kDeployed);
+        intakeSubsystem.setIntakePosition(IntakeArmPosition.kIntake);
     }
 
     @Override

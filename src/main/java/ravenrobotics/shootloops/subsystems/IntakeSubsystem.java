@@ -12,7 +12,6 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.IntakeConstants;
 import ravenrobotics.shootloops.Constants.MotorConstants;
@@ -36,42 +35,16 @@ public class IntakeSubsystem extends SubsystemBase
 
     //Shuffleboard
     private final GenericEntry armPositionEntry = Telemetry.teleopTab.add("Arm Position", 0).getEntry();
+    private final GenericEntry sensorEntry = Telemetry.teleopTab.add("Note Sensor", false).getEntry();
 
     private static IntakeSubsystem instance;
 
     public enum IntakeArmPosition
     {
-        kDeployed,
+        kIntake,
+        kAmp,
         kRetracted
     }
-
-    public Command intakeRoutineCommand = new Command() 
-    {
-        @Override
-        public void initialize()
-        {
-            setIntakePosition(IntakeArmPosition.kDeployed);
-        }
-
-        @Override
-        public void execute()
-        {
-            runRollersIntake();
-        }
-
-        @Override
-        public void end(boolean isInterrupted)
-        {
-            stopRollers();
-            setIntakePosition(IntakeArmPosition.kRetracted);
-        }
-
-        @Override
-        public boolean isFinished()
-        {
-            return getDistanceSensor();
-        }
-    };
 
     /**
      * Returns the active instance of the IntakeSubsystem.
@@ -108,10 +81,14 @@ public class IntakeSubsystem extends SubsystemBase
      */
     public void setIntakePosition(IntakeArmPosition position)
     {
-        if (position == IntakeArmPosition.kDeployed)
+        if (position == IntakeArmPosition.kIntake)
         {
             RGBSubsystem.getInstance().setPattern(RGBValues.kIntakeOut);
             armPIDController.setReference(IntakeConstants.kArmDeployedSetpoint, ControlType.kPosition);
+        }
+        else if (position == IntakeArmPosition.kAmp)
+        {
+            armPIDController.setReference(IntakeConstants.kArmAmpSetpoint, ControlType.kPosition);
         }
         else if (position == IntakeArmPosition.kRetracted)
         {
@@ -135,7 +112,7 @@ public class IntakeSubsystem extends SubsystemBase
 
     public void runRollersIntake()
     {
-        rollerMotor.set(-0.75);
+        rollerMotor.set(-0.5);
     }
 
     public void runRollersSlow()
@@ -150,7 +127,11 @@ public class IntakeSubsystem extends SubsystemBase
 
     public boolean getDistanceSensor()
     {
-        return distanceFilter.calculate(distanceSensor.get());
+        boolean isDetected = distanceFilter.calculate(distanceSensor.get());
+
+        if(isDetected) return false;
+
+        return true;
     }
 
     @Override
@@ -162,6 +143,7 @@ public class IntakeSubsystem extends SubsystemBase
         }
         //Update arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
+        sensorEntry.setBoolean(getDistanceSensor());
     }
 
     /**
@@ -181,7 +163,7 @@ public class IntakeSubsystem extends SubsystemBase
 
         armMotor.setClosedLoopRampRate(0.01);
         armPIDController.setFeedbackDevice(armMotorEncoder);
-        armPIDController.setOutputRange(-0.3, 0.5);
+        armPIDController.setOutputRange(-0.5, 0.5);
 
         //Set the PID constants for the PID controller.
         armPIDController.setP(IntakeConstants.kArmP);

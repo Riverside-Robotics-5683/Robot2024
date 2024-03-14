@@ -18,12 +18,12 @@ public class Robot extends TimedRobot {
   private RobotContainer robotContainer;
 
   @Override
-  public void robotInit() {
-    robotContainer = new RobotContainer();
-
+  public void robotInit() 
+  {
     DataLogManager.start();
-
     DriverStation.startDataLog(DataLogManager.getLog());
+
+    robotContainer = new RobotContainer();
   }
 
   @Override

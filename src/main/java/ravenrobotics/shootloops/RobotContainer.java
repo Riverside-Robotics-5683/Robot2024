@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import ravenrobotics.shootloops.Constants.DriverStationConstants;
 import ravenrobotics.shootloops.Constants.KinematicsConstants;
 import ravenrobotics.shootloops.commands.DriveCommand;
+import ravenrobotics.shootloops.commands.IntakeRoutineCommand;
 import ravenrobotics.shootloops.commands.RunFlywheelCommand;
 import ravenrobotics.shootloops.commands.autos.DriveForCommand;
 import ravenrobotics.shootloops.commands.autos.DriveForwardAuto;
@@ -42,6 +43,7 @@ public class RobotContainer
   private GenericEntry isFieldRelativeEntry = Telemetry.teleopTab.add("Field Relative", false).getEntry();
 
   private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
+  private final IntakeRoutineCommand intakeCommand = new IntakeRoutineCommand();
 
   private final SequentialCommandGroup driveOutAutoRight = new SequentialCommandGroup(
     new AutoShootCommand(),
@@ -65,6 +67,7 @@ public class RobotContainer
   public RobotContainer()
   {
     DriveSubsystem.getInstance().configPathPlanner();
+    ClimberSubsystem.getInstance();
 
     NamedCommands.registerCommand("lineUpSpeaker", new LineUpWithSpeakerCommand());
     NamedCommands.registerCommand("shootNote", new AutoShootCommand());
@@ -91,28 +94,37 @@ public class RobotContainer
     driverController.back().onTrue(new InstantCommand(() -> toggleFieldRelative()));
     driverController.start().onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverController.leftTrigger().whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
-    driverController.leftBumper().whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
-
-    driverController.rightTrigger().whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
-    driverController.rightBumper().whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
-
     driverController.y().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kFrontLeftOffset)));
     driverController.b().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kFrontRightOffset)));
     driverController.x().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kBackLeftOffset)));
     driverController.a().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kBackRightOffset)));
 
     driverController.rightStick().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().resetCenterofRotation()));
+    driverController.rightTrigger().whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().motorsToBrake(), () -> DriveSubsystem.getInstance().motorsToCoast()));
 
 
-    systemsController.x().onTrue(IntakeSubsystem.getInstance().intakeRoutineCommand);
-    systemsController.b().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().intakeRoutineCommand.cancel()));
+    systemsController.x().onTrue(intakeCommand);
+    systemsController.b().onTrue(new InstantCommand(() -> intakeCommand.cancel()));
 
     systemsController.leftTrigger().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().runRollersIntake()));
     systemsController.leftTrigger().onFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
 
+    systemsController.leftBumper().and(systemsController.y()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
+    systemsController.leftBumper().and(systemsController.a()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    systemsController.rightBumper().and(systemsController.y()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
+    systemsController.rightBumper().and(systemsController.a()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    systemsController.rightBumper().negate().and(systemsController.leftBumper().negate()).and(systemsController.y()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().bothUp(), () -> ClimberSubsystem.getInstance().stopMotors()));
+    systemsController.rightBumper().negate().and(systemsController.leftBumper().negate()).and(systemsController.a()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().bothDown(), () -> ClimberSubsystem.getInstance().stopMotors()));
+
     systemsController.rightTrigger().onTrue(flywheelCommand);
     systemsController.rightTrigger().onFalse(new InstantCommand(() -> flywheelCommand.cancel()));
+
+    systemsController.pov(0).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kAmp)));
+    systemsController.pov(180).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
+
+    systemsController.leftStick().whileTrue(new StartEndCommand(() -> IntakeSubsystem.getInstance().runRollersFlywheel(), () -> IntakeSubsystem.getInstance().stopRollers()));
   }
 
   public void setupTeleop()

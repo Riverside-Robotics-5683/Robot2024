@@ -84,7 +84,7 @@ public class DriveCommand extends Command
             xSpeedMPS = 0;
         }
         
-        if (Math.abs(ySpeed.getAsDouble()) < 0.04)
+        if (Math.abs(ySpeed.getAsDouble()) < 0.01)
         {
             yLimiter.reset(0);
             ySpeedMPS = 0;
