@@ -2,21 +2,15 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.34,
-      "y": 3.46
+      "x": 0.7401886415755699,
+      "y": 6.710309340732804
     },
-    "rotation": 0
+    "rotation": 59.69721494940297
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Start Right to Speaker"
-          }
-        },
         {
           "type": "sequential",
           "data": {
@@ -24,7 +18,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "lineUpSpeaker"
+                  "name": "imuLeft"
                 }
               },
               {
@@ -34,6 +28,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left to Note 2"
           }
         },
         {
@@ -43,6 +43,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "Note 1 to Left"
+          }
+        },
+        {
           "type": "sequential",
           "data": {
             "commands": [
@@ -64,7 +70,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Speaker to Out Left"
+            "pathName": "Left to Out"
           }
         }
       ]

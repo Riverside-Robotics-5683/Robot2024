@@ -2,19 +2,25 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.9932481519741916,
-      "y": 6.0
+      "x": 1.3732635157578024,
+      "y": 5.584689630917723
     },
-    "rotation": 0
+    "rotation": 0.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "shootNote"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "shortTest"
+            "pathName": "Center to Out Left"
           }
         }
       ]

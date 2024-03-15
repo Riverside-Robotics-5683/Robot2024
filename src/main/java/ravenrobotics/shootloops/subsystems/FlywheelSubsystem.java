@@ -42,7 +42,7 @@ public class FlywheelSubsystem extends SubsystemBase
 
     public void shootOn() 
     {
-        topMotor.set(-1);
+        topMotor.set(-.5);
         bottomMotor.set(-1);
     }
 
@@ -52,9 +52,19 @@ public class FlywheelSubsystem extends SubsystemBase
      bottomMotor.set(0);
     }
 
-    public double getVelocity()
+    public double getTotalVelocity()
     {
         return -(topMotorEncoder.getVelocity() + bottomMotorEncoder.getVelocity() / (double)2);
+    }
+
+    public double getTopVelocity()
+    {
+        return -topMotorEncoder.getVelocity();
+    }
+
+    public double getBottomVelocity()
+    {
+        return -bottomMotorEncoder.getVelocity();
     }
 
     @Override

@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.34,
-      "y": 7.0872969080790105
+      "x": 1.383130458568611,
+      "y": 5.535354916863679
     },
     "rotation": 0
   },
@@ -12,25 +12,19 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Start Left to Speaker"
-          }
-        },
-        {
           "type": "sequential",
           "data": {
             "commands": [
               {
                 "type": "named",
                 "data": {
-                  "name": "lineUpSpeaker"
+                  "name": "shootNote"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "shootNote"
+                  "name": "intakeNote"
                 }
               }
             ]
@@ -39,7 +33,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Speaker to Out Left"
+            "pathName": "Note 2 to Center"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootNote"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Center to Out Left"
           }
         }
       ]

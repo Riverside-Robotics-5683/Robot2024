@@ -43,7 +43,7 @@ public class Constants
         /////////////////////
         ///Other Constants///
         /////////////////////
-        public static final double kDriveMaxSpeedMPS = Units.feetToMeters(13.87);
+        public static final double kDriveMaxSpeedMPS = Units.feetToMeters(6);
         //Slew rates.
         public static final double kTranslationSlewRate = 1.5;
         public static final double kRotationSlewRate = 1.0;

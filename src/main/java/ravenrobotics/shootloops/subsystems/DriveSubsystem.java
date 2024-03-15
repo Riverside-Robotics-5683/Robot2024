@@ -113,6 +113,7 @@ public class DriveSubsystem extends SubsystemBase
     private Translation2d centerOfRotation = new Translation2d();
 
     private boolean isBrakeMode = false;
+    private boolean manualBrakeMode = false;
 
     private final GenericEntry brakeModeEntry = Telemetry.teleopTab.add("Brake Mode", false).getEntry();
 
@@ -229,13 +230,16 @@ public class DriveSubsystem extends SubsystemBase
 
         if (Math.abs(speeds.omegaRadiansPerSecond) > Math.abs(speeds.vxMetersPerSecond) && Math.abs(speeds.omegaRadiansPerSecond) > Math.abs(speeds.vyMetersPerSecond))
         {
-            isBrakeMode = true;
             motorsToBrake();
         }
         else
         {
-            isBrakeMode = false;
             motorsToCoast();
+        }
+
+        if (manualBrakeMode)
+        {
+            motorsToBrake();
         }
 
         //Convert the ChassisSpeeds to individual wheel speeds.
@@ -366,6 +370,16 @@ public class DriveSubsystem extends SubsystemBase
         backRight.setIdleMode(IdleMode.kCoast);
     }
 
+    public void manualBrakeOn()
+    {
+        manualBrakeMode = true;
+    }
+
+    public void manualBrakeOff()
+    {
+        manualBrakeMode = false;
+    }
+
     /**
      * Get the quasistatic SysID command.
      * 
@@ -397,17 +411,6 @@ public class DriveSubsystem extends SubsystemBase
         double[] imuSpeeds = {IMUSubsystem.getInstance().getXSpeed(), IMUSubsystem.getInstance().getYSpeed(), IMUSubsystem.getInstance().getZSpeed()};
 
         imuSpeedsLog.append(imuSpeeds);
-
-        // if (Math.abs(imuSpeeds[2]) > Math.abs(imuSpeeds[0]) && Math.abs(imuSpeeds[2]) > Math.abs(imuSpeeds[1]))
-        // {
-        //     //System.out.println("Brake mode on");
-        //     motorsToBrake();
-        // }
-        // else
-        // {
-        //     //System.out.println("Brake mode off");
-        //     motorsToCoast();
-        // }
 
         brakeModeEntry.setBoolean(isBrakeMode);
 

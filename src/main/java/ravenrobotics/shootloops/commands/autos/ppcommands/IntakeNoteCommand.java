@@ -60,6 +60,6 @@ public class IntakeNoteCommand extends Command
     @Override
     public boolean isFinished()
     {
-        return isDone;
+        return isDone || intakeSubsystem.getDistanceSensor();
     }
 }

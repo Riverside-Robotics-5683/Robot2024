@@ -55,7 +55,7 @@ public class RobotContainer
     new DriveForCommand(2, -0.05, 5)
   );
 
-  private final SendableChooser<Command> autoChooser = new SendableChooser<Command>();
+  private final SendableChooser<Command> autoChooser;
 
   //Main drive command.
   private final DriveCommand driveCommand = new DriveCommand(
@@ -73,9 +73,12 @@ public class RobotContainer
     NamedCommands.registerCommand("shootNote", new AutoShootCommand());
     NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand());
 
+    NamedCommands.registerCommand("imuLeft", new InstantCommand(() -> IMUSubsystem.getInstance().setYawToLeftSubwoofer()));
+    NamedCommands.registerCommand("imuRight", new InstantCommand(() -> IMUSubsystem.getInstance().setYawToRightSubwoofer()));
+
     RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
 
-    //autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser = AutoBuilder.buildAutoChooser();
 
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
     autoChooser.addOption("Shoot then Drive Out Right", driveOutAutoRight);
@@ -100,7 +103,7 @@ public class RobotContainer
     driverController.a().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kBackRightOffset)));
 
     driverController.rightStick().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().resetCenterofRotation()));
-    driverController.rightTrigger().whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().motorsToBrake(), () -> DriveSubsystem.getInstance().motorsToCoast()));
+    driverController.rightTrigger().whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().manualBrakeOn(), () -> DriveSubsystem.getInstance().manualBrakeOff()));
 
 
     systemsController.x().onTrue(intakeCommand);
@@ -151,6 +154,7 @@ public class RobotContainer
   public Command getAutonomousCommand()
   {
     DriveSubsystem.getInstance().motorsToBrake();
+    IMUSubsystem.getInstance().zeroYaw();
     //ClimberSubsystem.getInstance().bothDown();
     return autoChooser.getSelected();
   }
