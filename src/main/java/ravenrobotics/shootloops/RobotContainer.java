@@ -39,20 +39,22 @@ public class RobotContainer
   private final CommandXboxController systemsController = new CommandXboxController(DriverStationConstants.kSystemsPort);
 
   //Whether to drive field relative or not.
-  public boolean isFieldRelative = false;
+  public boolean isFieldRelative = true;
   private GenericEntry isFieldRelativeEntry = Telemetry.teleopTab.add("Field Relative", false).getEntry();
 
   private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
   private final IntakeRoutineCommand intakeCommand = new IntakeRoutineCommand();
 
   private final SequentialCommandGroup driveOutAutoRight = new SequentialCommandGroup(
+    new InstantCommand(() -> IMUSubsystem.getInstance().setYawToRightSubwoofer()),
     new AutoShootCommand(),
-    new DriveForCommand(2, 0.05, 5)
+    new DriveForCommand(0.5, 0.05, 3)
   );
 
   private final SequentialCommandGroup driveOutAutoLeft = new SequentialCommandGroup(
+    new InstantCommand(() -> IMUSubsystem.getInstance().setYawToLeftSubwoofer()),
     new AutoShootCommand(),
-    new DriveForCommand(2, -0.05, 5)
+    new DriveForCommand(0.5, -0.05, 3)
   );
 
   private final SendableChooser<Command> autoChooser;
@@ -71,18 +73,22 @@ public class RobotContainer
 
     NamedCommands.registerCommand("lineUpSpeaker", new LineUpWithSpeakerCommand());
     NamedCommands.registerCommand("shootNote", new AutoShootCommand());
-    NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand());
+    NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand().withTimeout(3));
 
     NamedCommands.registerCommand("imuLeft", new InstantCommand(() -> IMUSubsystem.getInstance().setYawToLeftSubwoofer()));
     NamedCommands.registerCommand("imuRight", new InstantCommand(() -> IMUSubsystem.getInstance().setYawToRightSubwoofer()));
+
+    NamedCommands.registerCommand("intakeOut", new SetIntakeCommand(IntakeArmPosition.kIntake));
+    NamedCommands.registerCommand("intakeIn", new SetIntakeCommand(IntakeArmPosition.kRetracted));
 
     RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
-    autoChooser.addOption("Shoot then Drive Out Right", driveOutAutoRight);
-    autoChooser.addOption("Shoot then Drive Out Left", driveOutAutoLeft);
+    autoChooser.addOption("1 Note Drive Out Right", driveOutAutoRight);
+    autoChooser.addOption("1 Note Drive Out Left", driveOutAutoLeft);
+    autoChooser.addOption("Shoot No Mobility", new AutoShootCommand());
 
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 
@@ -127,12 +133,13 @@ public class RobotContainer
     systemsController.pov(0).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kAmp)));
     systemsController.pov(180).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
 
-    systemsController.leftStick().whileTrue(new StartEndCommand(() -> IntakeSubsystem.getInstance().runRollersFlywheel(), () -> IntakeSubsystem.getInstance().stopRollers()));
+    systemsController.pov(90).whileTrue(new StartEndCommand(() -> IntakeSubsystem.getInstance().runRollersAmp(), () -> IntakeSubsystem.getInstance().stopRollers()));
   }
 
   public void setupTeleop()
   {
     DriveSubsystem.getInstance().motorsToCoast();
+    DriveSubsystem.getInstance().manualBrakeOff();
     // ClimberSubsystem.getInstance().bothDown();
   }
 
@@ -154,6 +161,7 @@ public class RobotContainer
   public Command getAutonomousCommand()
   {
     DriveSubsystem.getInstance().motorsToBrake();
+    DriveSubsystem.getInstance().manualBrakeOn();
     IMUSubsystem.getInstance().zeroYaw();
     //ClimberSubsystem.getInstance().bothDown();
     return autoChooser.getSelected();

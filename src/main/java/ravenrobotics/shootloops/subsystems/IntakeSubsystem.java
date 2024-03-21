@@ -114,6 +114,11 @@ public class IntakeSubsystem extends SubsystemBase
     {
         rollerMotor.set(-0.5);
     }
+    
+    public void runRollersAmp()
+    {
+        rollerMotor.set(0.6);
+    }
 
     public void runRollersSlow()
     {
@@ -164,6 +169,7 @@ public class IntakeSubsystem extends SubsystemBase
         armMotor.setClosedLoopRampRate(0.01);
         armPIDController.setFeedbackDevice(armMotorEncoder);
         armPIDController.setOutputRange(-0.5, 0.5);
+        armMotor.setClosedLoopRampRate(0.125);
 
         //Set the PID constants for the PID controller.
         armPIDController.setP(IntakeConstants.kArmP);

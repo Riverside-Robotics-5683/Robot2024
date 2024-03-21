@@ -1,7 +1,6 @@
 package ravenrobotics.shootloops.commands.autos.ppcommands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import ravenrobotics.shootloops.subsystems.DriveSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
@@ -11,10 +10,6 @@ public class IntakeNoteCommand extends Command
 {
     private final DriveSubsystem driveSubsystem;
     private final IntakeSubsystem intakeSubsystem;
-    
-    private boolean isDone = false;
-
-    private int mode = 0;
 
     public IntakeNoteCommand()
     {
@@ -25,28 +20,10 @@ public class IntakeNoteCommand extends Command
     }
 
     @Override
-    public void initialize()
-    {
-        intakeSubsystem.setIntakePosition(IntakeArmPosition.kIntake);
-    }
-
-    @Override
     public void execute()
     {
-        if (!intakeSubsystem.waitForIntake() && mode == 0)
-        {
-            return;
-        }
-
-        mode = 1;
-
         intakeSubsystem.runRollersIntake();
-
-        driveSubsystem.drive(new ChassisSpeeds(1, 0, 0));
-
-        Timer.delay(3);
-
-        isDone = true;
+        driveSubsystem.drive(new ChassisSpeeds(0.125, 0, 0));
     }
 
     @Override
@@ -60,6 +37,6 @@ public class IntakeNoteCommand extends Command
     @Override
     public boolean isFinished()
     {
-        return isDone || intakeSubsystem.getDistanceSensor();
+        return intakeSubsystem.getDistanceSensor();
     }
 }

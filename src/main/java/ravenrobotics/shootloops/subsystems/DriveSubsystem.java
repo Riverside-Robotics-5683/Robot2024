@@ -7,7 +7,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -33,11 +32,11 @@ import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import ravenrobotics.shootloops.AutoConstants;
 import ravenrobotics.shootloops.Constants.DrivetrainConstants;
 import ravenrobotics.shootloops.Constants.KinematicsConstants;
 import ravenrobotics.shootloops.Constants.MotorConstants;
@@ -125,6 +124,7 @@ public class DriveSubsystem extends SubsystemBase
     private final DoubleLogEntry backRightSpeed;
 
     private final StringLogEntry chassisSpeedsLog;
+    private final StringLogEntry chassisSpeedInputLog;
     private final DoubleArrayLogEntry imuSpeedsLog;
 
     //Instance object for simplifying getting the subsystem for commands.
@@ -172,6 +172,8 @@ public class DriveSubsystem extends SubsystemBase
 
         chassisSpeedsLog = new StringLogEntry(log, "/drive/chassisSpeed");
         imuSpeedsLog = new DoubleArrayLogEntry(log, "/imu/imuSpeeds");
+
+        chassisSpeedInputLog = new StringLogEntry(log, "/drive/chassisInput");
     }
 
     /**
@@ -179,7 +181,7 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void configPathPlanner()
     {
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configureRamsete(
             //Gives the robot pose as a Pose2d.
             this::getRobotPose,
             //Resets the robot pose to a Pose2d (the beginning of the path).
@@ -188,18 +190,7 @@ public class DriveSubsystem extends SubsystemBase
             this::getRobotSpeed,
             //Feeds a ChassisSpeed object to the drivetrain for actually driving the path.
             this::drive,
-            //Path following config.
-            new HolonomicPathFollowerConfig(
-                //PID Constants.
-                AutoConstants.kAutoTranslationPIDConstants,
-                AutoConstants.kAutoRotationPIDConstants,
-                //Max speed in autonomous (m/s).
-                AutoConstants.kMaxAutoSpeed,
-                //The radius of the robot.
-                AutoConstants.kRobotRadius,
-                //Replanning config (what happens if the robot gets off of the path).
-                new ReplanningConfig()
-            ),
+            new ReplanningConfig(false, false),
             //Check if the path should get flipped if we are on Red Alliance.
             () ->
             {
@@ -228,7 +219,9 @@ public class DriveSubsystem extends SubsystemBase
     {
         if (isClimbing) return;
 
-        if (Math.abs(speeds.omegaRadiansPerSecond) > Math.abs(speeds.vxMetersPerSecond) && Math.abs(speeds.omegaRadiansPerSecond) > Math.abs(speeds.vyMetersPerSecond))
+        chassisSpeedInputLog.append(speeds.toString());
+
+        if (Math.abs(speeds.omegaRadiansPerSecond) > 0.1)
         {
             motorsToBrake();
         }
@@ -251,6 +244,11 @@ public class DriveSubsystem extends SubsystemBase
         frontRight.set(wheelSpeeds.frontRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backRight.set(wheelSpeeds.rearRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
+
+        drivetrainPose = driveOdometry.update(
+            IMUSubsystem.getInstance().getYaw(),
+            getWheelPositions()
+        );
 
         //Log the individual wheel speeds to the log.
         frontLeftSpeed.append(wheelSpeeds.frontLeftMetersPerSecond);
@@ -334,6 +332,18 @@ public class DriveSubsystem extends SubsystemBase
         frontRightEncoder.setPosition(0);
         backLeftEncoder.setPosition(0);
         backRightEncoder.setPosition(0);
+
+        var alliance = DriverStation.getAlliance();
+
+        if (alliance.isPresent())
+        {
+            if (alliance.get() == Alliance.Red) IMUSubsystem.getInstance().resetYaw(newPose.getRotation().getDegrees() - 180);
+            else IMUSubsystem.getInstance().resetYaw(newPose.getRotation().getDegrees());
+        }
+        else
+        {
+            IMUSubsystem.getInstance().resetYaw(newPose.getRotation().getDegrees());
+        }
 
         drivetrainPose = newPose;
         driveOdometry.resetPosition(IMUSubsystem.getInstance().getYaw(), getWheelPositions(), newPose);

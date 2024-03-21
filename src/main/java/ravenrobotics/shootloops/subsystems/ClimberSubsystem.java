@@ -50,7 +50,7 @@ public class ClimberSubsystem extends SubsystemBase
         switch (direction)
         {
             case kUp -> leftClimber.set(ControlMode.PercentOutput, -.75);
-            case kDown -> {if (!leftLimitSwitch.get()) return; leftClimber.set(ControlMode.PercentOutput, .75);}
+            case kDown -> {if (!leftLimitSwitch.get()) {leftClimber.set(ControlMode.PercentOutput, 0); return;} leftClimber.set(ControlMode.PercentOutput, .75);}
         }
     }
 
@@ -59,7 +59,7 @@ public class ClimberSubsystem extends SubsystemBase
         switch (direction)
         {
             case kUp -> rightClimber.set(ControlMode.PercentOutput, .75);
-            case kDown -> {if (!rightLimitSwitch.get()) return; rightClimber.set(ControlMode.PercentOutput, -.75);}
+            case kDown -> {if (!rightLimitSwitch.get()) {rightClimber.set(ControlMode.PercentOutput, 0); return;} rightClimber.set(ControlMode.PercentOutput, -.75);}
         }
     }
 

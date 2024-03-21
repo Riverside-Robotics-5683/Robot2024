@@ -42,7 +42,7 @@ public class FlywheelSubsystem extends SubsystemBase
 
     public void shootOn() 
     {
-        topMotor.set(-.5);
+        topMotor.set(-1);
         bottomMotor.set(-1);
     }
 

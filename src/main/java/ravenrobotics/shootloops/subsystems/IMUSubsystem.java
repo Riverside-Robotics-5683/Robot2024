@@ -93,6 +93,11 @@ public class IMUSubsystem extends SubsystemBase
         imu.setYaw(0.0);
     }
 
+    public void resetYaw(double angle)
+    {
+        imu.setYaw(angle);
+    }
+
     public void setYawToLeftSubwoofer()
     {
         imu.setYaw(-300);
