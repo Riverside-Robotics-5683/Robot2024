@@ -108,23 +108,32 @@ public class DriveSubsystem extends SubsystemBase
     private Pose2d drivetrainPose;
     private Field2d fieldData = new Field2d();
 
+    //Variable for whether the robot is climbing, so the drivebase is disabled.
     private boolean isClimbing = false;
+    //The center of rotation (for orbiting on a specific wheel to avoid another bot).
     private Translation2d centerOfRotation = new Translation2d();
 
+    //Whether the motors should be in brake mode.
     private boolean isBrakeMode = false;
+    //Manual braking commanded from the driver.
     private boolean manualBrakeMode = false;
 
+    //Brake mode entry in Shuffleboard.
     private final GenericEntry brakeModeEntry = Telemetry.teleopTab.add("Brake Mode", false).getEntry();
 
+    //The main data log.
     private final DataLog log;
 
+    //Log entries for the individual wheel speeds.
     private final DoubleLogEntry frontLeftSpeed;
     private final DoubleLogEntry frontRightSpeed;
     private final DoubleLogEntry backLeftSpeed;
     private final DoubleLogEntry backRightSpeed;
 
+    //Log entries for the actual ChassisSpeeds and the target ChassisSpeeds.
     private final StringLogEntry chassisSpeedsLog;
     private final StringLogEntry chassisSpeedInputLog;
+    //Log entry for the values measured from the IMU's accelerometer (testing).
     private final DoubleArrayLogEntry imuSpeedsLog;
 
     //Instance object for simplifying getting the subsystem for commands.
@@ -163,16 +172,20 @@ public class DriveSubsystem extends SubsystemBase
         //Add the Field2d widget to Shuffleboard so we can see the robot's position.
         Telemetry.teleopTab.add("Robot Position", fieldData);
 
+        //Get the active data log instance.
         log = DataLogManager.getLog();
 
+        //Instantiate the entries for the wheel speeds.
         frontLeftSpeed = new DoubleLogEntry(log, "/drive/fLSpeed");
         frontRightSpeed = new DoubleLogEntry(log, "/drive/fRSpeed");
         backLeftSpeed = new DoubleLogEntry(log, "/drive/bLSpeed");
         backRightSpeed = new DoubleLogEntry(log, "/drive/bRSpeed");
 
+        //Instantiate the entries for the actual ChassisSpeeds entries and the IMU speeds.
         chassisSpeedsLog = new StringLogEntry(log, "/drive/chassisSpeed");
         imuSpeedsLog = new DoubleArrayLogEntry(log, "/imu/imuSpeeds");
 
+        //Instantiate the entries for the target ChassisSpeeds provided by driver input.
         chassisSpeedInputLog = new StringLogEntry(log, "/drive/chassisInput");
     }
 
@@ -181,6 +194,7 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void configPathPlanner()
     {
+        //Configure PathPlanner's auto builder so autos can be automatically built.
         AutoBuilder.configureRamsete(
             //Gives the robot pose as a Pose2d.
             this::getRobotPose,
@@ -201,7 +215,7 @@ public class DriveSubsystem extends SubsystemBase
                 {
                     return alliance.get() == DriverStation.Alliance.Red;
                 }
-
+                //If the alliance is blue alliance, don't mirror the path.
                 return false;
             },
 
@@ -217,19 +231,24 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void drive(ChassisSpeeds speeds)
     {
+        //If the robot is climbing, don't set wheel speeds.
         if (isClimbing) return;
 
+        //Append the target ChassisSpeeds to the log.
         chassisSpeedInputLog.append(speeds.toString());
 
+        //If we are making a major turn, set the motors to brake mode.
         if (Math.abs(speeds.omegaRadiansPerSecond) > 0.1)
         {
             motorsToBrake();
         }
         else
         {
+            //If we are not making a major turn, set the motors back to coast mode.
             motorsToCoast();
         }
 
+        //If we are manually braking, set the motors to brake mode.
         if (manualBrakeMode)
         {
             motorsToBrake();
@@ -245,6 +264,7 @@ public class DriveSubsystem extends SubsystemBase
         backLeft.set(wheelSpeeds.rearLeftMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
         backRight.set(wheelSpeeds.rearRightMetersPerSecond / DrivetrainConstants.kDriveMaxSpeedMPS);
 
+        //Update the odometry since we are changing position.
         drivetrainPose = driveOdometry.update(
             IMUSubsystem.getInstance().getYaw(),
             getWheelPositions()
@@ -257,21 +277,35 @@ public class DriveSubsystem extends SubsystemBase
         backRightSpeed.append(wheelSpeeds.rearRightMetersPerSecond);
     }
 
+    /**
+     * Sets the center of rotation for the drivetrian kinematics.
+     * 
+     * @param centerOfRotation The new center of rotation as a Translation2d.
+     */
     public void setCenterOfRotation(Translation2d centerOfRotation)
     {
         this.centerOfRotation = centerOfRotation;
     }
 
+    /**
+     * Resets the center of rotation to the center.
+     */
     public void resetCenterofRotation()
     {
         this.centerOfRotation = new Translation2d();
     }
 
+    /**
+     * Sets the drivetrain to the climbing mode (no moving).
+     */
     public void isClimbing()
     {
         isClimbing = true;
     }
 
+    /**
+     * Sets the drivetrain to not be in climbing mode (moving allowed).
+     */
     public void isNotClimbing()
     {
         isClimbing = false;
@@ -292,6 +326,7 @@ public class DriveSubsystem extends SubsystemBase
             backRightEncoder.getVelocity()
         );
 
+        //Construct a ChassisSpeeds of the robot's overall speed from the wheel speeds, then return it.
         ChassisSpeeds chassisSpeeds = KinematicsConstants.kDriveKinematics.toChassisSpeeds(speeds);
         return chassisSpeeds;
     }
@@ -328,24 +363,31 @@ public class DriveSubsystem extends SubsystemBase
      */
     public void resetRobotPose(Pose2d newPose)
     {
+        //Reset all the drive motor encoders.
         frontLeftEncoder.setPosition(0);
         frontRightEncoder.setPosition(0);
         backLeftEncoder.setPosition(0);
         backRightEncoder.setPosition(0);
 
+        //Get the alliance from the driver station.
         var alliance = DriverStation.getAlliance();
 
         if (alliance.isPresent())
         {
+            //If the alliance is red alliance, set the IMU to the preset pose but unflipped.
             if (alliance.get() == Alliance.Red) IMUSubsystem.getInstance().resetYaw(newPose.getRotation().getDegrees() - 180);
+            //If the alliance is blue alliance, set the IMU to the preset pose.
             else IMUSubsystem.getInstance().resetYaw(newPose.getRotation().getDegrees());
         }
         else
         {
+            //If the alliance isn't "present", set the IMU to the pose.
             IMUSubsystem.getInstance().resetYaw(newPose.getRotation().getDegrees());
         }
 
+        //Set the drivetrainPose to the new pose.
         drivetrainPose = newPose;
+        //Reset the odometry to the new pose.
         driveOdometry.resetPosition(IMUSubsystem.getInstance().getYaw(), getWheelPositions(), newPose);
     }
 
@@ -360,6 +402,9 @@ public class DriveSubsystem extends SubsystemBase
         backRight.stopMotor();
     }
 
+    /**
+     * Sets the drivetrain motors to brake mode.
+     */
     public void motorsToBrake()
     {
         isBrakeMode = true;
@@ -370,6 +415,9 @@ public class DriveSubsystem extends SubsystemBase
         backRight.setIdleMode(IdleMode.kBrake);
     }
 
+    /**
+     * Sets the drivetrain motors to coast mode.
+     */
     public void motorsToCoast()
     {
         isBrakeMode = false;
@@ -380,11 +428,17 @@ public class DriveSubsystem extends SubsystemBase
         backRight.setIdleMode(IdleMode.kCoast);
     }
 
+    /**
+     * Turns on the manual brake.
+     */
     public void manualBrakeOn()
     {
         manualBrakeMode = true;
     }
 
+    /**
+     * Turns off the manual brake.
+     */
     public void manualBrakeOff()
     {
         manualBrakeMode = false;
@@ -418,10 +472,12 @@ public class DriveSubsystem extends SubsystemBase
         //Update the battery voltage on telemetry.
         batteryVoltage.setDouble(RobotController.getBatteryVoltage());
 
+        //Get the IMU accelerometer speeds.
         double[] imuSpeeds = {IMUSubsystem.getInstance().getXSpeed(), IMUSubsystem.getInstance().getYSpeed(), IMUSubsystem.getInstance().getZSpeed()};
 
+        //Append the acclerometer speeds to the log.
         imuSpeedsLog.append(imuSpeeds);
-
+        //Set the Shufflebo
         brakeModeEntry.setBoolean(isBrakeMode);
 
         //Update the odometry.
@@ -430,6 +486,7 @@ public class DriveSubsystem extends SubsystemBase
             getWheelPositions()
         );
 
+        //Append the actual robot speed to the log.
         chassisSpeedsLog.append(getRobotSpeed().toString());
 
         //Update the robot pose on the field widget.
@@ -459,21 +516,25 @@ public class DriveSubsystem extends SubsystemBase
         backLeft.setIdleMode(IdleMode.kCoast);
         backRight.setIdleMode(IdleMode.kCoast);
 
+        //Set the current limits so that stuff DOESN'T break.
         frontLeft.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         frontRight.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         backLeft.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         backRight.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
+        //Reset the encoder positions to 0.
         frontLeftEncoder.setPosition(0);
         frontRightEncoder.setPosition(0);
         backLeftEncoder.setPosition(0);
         backRightEncoder.setPosition(0);
 
+        //Set the position conversion factor so that the motors report an accurate distance.
         frontLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
         frontRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
         backLeftEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
         backRightEncoder.setPositionConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
 
+        //Set the velocity conversion factor so that the motors report an accurate velocity.
         frontLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
         frontRightEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
         backLeftEncoder.setVelocityConversionFactor(DrivetrainConstants.kEncoderConversionFactor);
