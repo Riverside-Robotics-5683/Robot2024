@@ -11,12 +11,15 @@ import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import ravenrobotics.shootloops.Constants.DriverStationConstants;
+import ravenrobotics.shootloops.Constants.KinematicsConstants;
 import ravenrobotics.shootloops.commands.DriveCommand;
+import ravenrobotics.shootloops.commands.IntakeRoutineCommand;
 import ravenrobotics.shootloops.commands.RunFlywheelCommand;
+import ravenrobotics.shootloops.commands.autos.DriveForCommand;
 import ravenrobotics.shootloops.commands.autos.DriveForwardAuto;
 import ravenrobotics.shootloops.commands.autos.ppcommands.*;
 import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
@@ -32,84 +35,142 @@ import ravenrobotics.shootloops.util.Telemetry;
 public class RobotContainer 
 {
   //Driver controller (drives the robot around).
-  //private final CommandXboxController driverController = new CommandXboxController(DriverStationConstants.kDriverPort);
-  private final CommandJoystick driverJoystick = new CommandJoystick(DriverStationConstants.kDriverPort);
+  private final CommandXboxController driverController = new CommandXboxController(DriverStationConstants.kDriverPort);
   private final CommandXboxController systemsController = new CommandXboxController(DriverStationConstants.kSystemsPort);
 
   //Whether to drive field relative or not.
-  public boolean isFieldRelative = false;
+  public boolean isFieldRelative = true;
   private GenericEntry isFieldRelativeEntry = Telemetry.teleopTab.add("Field Relative", false).getEntry();
 
+  //The commands for running the flywheel and automatically intaking.
   private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
+  private final IntakeRoutineCommand intakeCommand = new IntakeRoutineCommand();
 
+  //Auto for shooting then driving right.
+  private final SequentialCommandGroup driveOutAutoRight = new SequentialCommandGroup(
+    new InstantCommand(() -> IMUSubsystem.getInstance().setYawToRightSubwoofer()),
+    new AutoShootCommand(),
+    new DriveForCommand(0.5, 0.05, 3)
+  );
+
+  //Auto for shooting then driving left.
+  private final SequentialCommandGroup driveOutAutoLeft = new SequentialCommandGroup(
+    new InstantCommand(() -> IMUSubsystem.getInstance().setYawToLeftSubwoofer()),
+    new AutoShootCommand(),
+    new DriveForCommand(0.5, -0.05, 3)
+  );
+
+  //Chooser on the dashboard for autos.
   private final SendableChooser<Command> autoChooser;
 
   //Main drive command.
   private final DriveCommand driveCommand = new DriveCommand(
-    () -> -driverJoystick.getY(),
-    () -> -driverJoystick.getX(),
-    () -> -driverJoystick.getZ(),
+    () -> -driverController.getLeftY(),
+    () -> -driverController.getLeftX(),
+    () -> -driverController.getRightX(),
     () -> isFieldRelative);
 
+  /**
+   * The container for setting everything driver- and auto-related.
+   */
   public RobotContainer()
   {
+    //Configure PathPlanner.
     DriveSubsystem.getInstance().configPathPlanner();
+    //Initialize the climber subsystem.
+    ClimberSubsystem.getInstance();
 
+    //Register the speaker/note related auto commands.
     NamedCommands.registerCommand("lineUpSpeaker", new LineUpWithSpeakerCommand());
     NamedCommands.registerCommand("shootNote", new AutoShootCommand());
-    NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand());
+    NamedCommands.registerCommand("intakeNote", new IntakeNoteCommand().withTimeout(3));
 
+    //Register the IMU-related auto commands.
+    NamedCommands.registerCommand("imuLeft", new InstantCommand(() -> IMUSubsystem.getInstance().setYawToLeftSubwoofer()));
+    NamedCommands.registerCommand("imuRight", new InstantCommand(() -> IMUSubsystem.getInstance().setYawToRightSubwoofer()));
+
+    //Register the note-related auto commands.
+    NamedCommands.registerCommand("intakeOut", new SetIntakeCommand(IntakeArmPosition.kIntake));
+    NamedCommands.registerCommand("intakeIn", new SetIntakeCommand(IntakeArmPosition.kRetracted));
+
+    //Set the RGB pattern to the default pattern.
     RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
 
+    //Initialize the auto chooser with all of the PathPlanner autos.
     autoChooser = AutoBuilder.buildAutoChooser();
 
+    //Add the autos created outside of PathPlanner.
     autoChooser.addOption("Drive Forward", new DriveForwardAuto());
+    autoChooser.addOption("1 Note Drive Out Right", driveOutAutoRight);
+    autoChooser.addOption("1 Note Drive Out Left", driveOutAutoLeft);
+    autoChooser.addOption("Shoot No Mobility", new AutoShootCommand());
 
+    //Send the chooser to the dashboard.
     Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 
     //Configure configured controller bindings.
     configureBindings();
+    //Set the default command for the drive subsystem to the drive command.
     DriveSubsystem.getInstance().setDefaultCommand(driveCommand);
   }
 
   private void configureBindings()
   {
-    //Set the buttons on the joystick for field-relative and zeroing the heading.
-    driverJoystick.button(2).onTrue(new InstantCommand(() -> toggleFieldRelative()));
-    driverJoystick.button(12).onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
+    //Set the buttons on the driver controller for field-relative and zeroing the heading.
+    driverController.back().onTrue(new InstantCommand(() -> toggleFieldRelative()));
+    driverController.start().onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
-    driverJoystick.button(1).whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().motorsToBrake(), () -> DriveSubsystem.getInstance().motorsToCoast()));
+    //Set the ABXY array on the driver controller for switching the center of rotation.
+    driverController.y().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kFrontLeftOffset)));
+    driverController.b().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kFrontRightOffset)));
+    driverController.x().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kBackLeftOffset)));
+    driverController.a().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().setCenterOfRotation(KinematicsConstants.kBackRightOffset)));
 
-    driverJoystick.button(5).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
-    driverJoystick.button(3).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+    //Set the right stick on the driver controller for resetting the center of rotation.
+    driverController.rightStick().onTrue(new InstantCommand(() -> DriveSubsystem.getInstance().resetCenterofRotation()));
+    //Set the right trigger on the driver controller to turn on the brake.
+    driverController.rightTrigger().whileTrue(new StartEndCommand(() -> DriveSubsystem.getInstance().manualBrakeOn(), () -> DriveSubsystem.getInstance().manualBrakeOff()));
 
-    driverJoystick.button(6).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
-    driverJoystick.button(4).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+    //Set the X and B buttons on the systems controller to automatically run the intake and then manually retract it.
+    systemsController.x().onTrue(intakeCommand);
+    systemsController.b().onTrue(new InstantCommand(() -> intakeCommand.cancel()));
 
-    driverJoystick.pov(0).whileTrue(new StartEndCommand(() -> {ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp); ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp);}, () -> ClimberSubsystem.getInstance().stopMotors()));
-    driverJoystick.pov(180).whileTrue(new StartEndCommand(() -> {ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown); ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown);}, () -> ClimberSubsystem.getInstance().stopMotors()));
-
-    driverJoystick.button(9).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toBrake(); DriveSubsystem.getInstance().isClimbing();}));
-    driverJoystick.button(10).onTrue(new InstantCommand(() -> {ClimberSubsystem.getInstance().toCoast(); DriveSubsystem.getInstance().isNotClimbing();}));
-
-    // driverJoystick.button(7).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kForward));
-    // driverJoystick.button(8).onTrue(DriveSubsystem.getInstance().getSysIDDynamic(Direction.kReverse));
-    // driverJoystick.button(9).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kForward));
-    // driverJoystick.button(10).onTrue(DriveSubsystem.getInstance().getSysIDQuasistatic(Direction.kReverse));
-    
-    systemsController.x().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kDeployed)));
-    systemsController.b().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
-
-    systemsController.leftTrigger().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().intakeRunRollers()));
+    //Set the left trigger on the systemst controller to manually run the rollers for intaking.
+    systemsController.leftTrigger().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().runRollersIntake()));
     systemsController.leftTrigger().onFalse(new InstantCommand(() -> IntakeSubsystem.getInstance().stopRollers()));
 
+    //Set the left trigger+y/a on the systems controllerto move the left climber up or down.
+    systemsController.leftBumper().and(systemsController.y()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
+    systemsController.leftBumper().and(systemsController.a()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveLeft(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    //Set the right trigger+y/a on the systems controller to move the right climber up or down.
+    systemsController.rightBumper().and(systemsController.y()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kUp), () -> ClimberSubsystem.getInstance().stopMotors()));
+    systemsController.rightBumper().and(systemsController.a()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().moveRight(ClimberDirection.kDown), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    //Set y/a on the systems controller to move both climbers up or down.
+    systemsController.rightBumper().negate().and(systemsController.leftBumper().negate()).and(systemsController.y()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().bothUp(), () -> ClimberSubsystem.getInstance().stopMotors()));
+    systemsController.rightBumper().negate().and(systemsController.leftBumper().negate()).and(systemsController.a()).whileTrue(new StartEndCommand(() -> ClimberSubsystem.getInstance().bothDown(), () -> ClimberSubsystem.getInstance().stopMotors()));
+
+    //Set the right trigger on the systems controller to run the flywheel for shooting a note.
     systemsController.rightTrigger().onTrue(flywheelCommand);
     systemsController.rightTrigger().onFalse(new InstantCommand(() -> flywheelCommand.cancel()));
+
+    //Set the POV hat on the systems controller to set the intake to the amp position when pressed in the up direction, and to move back to the retracted position when pressed down.
+    systemsController.pov(0).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kAmp)));
+    systemsController.pov(180).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kRetracted)));
+
+    //Set the POV hat on the systems controller to push out the note when pushed right.
+    systemsController.pov(90).whileTrue(new StartEndCommand(() -> IntakeSubsystem.getInstance().runRollersAmp(), () -> IntakeSubsystem.getInstance().stopRollers()));
   }
 
+  /**
+   * Sets up the robot for teleop.
+   */
   public void setupTeleop()
   {
+    //Set the motors to coast mode and turns off the manual brake.
     DriveSubsystem.getInstance().motorsToCoast();
+    DriveSubsystem.getInstance().manualBrakeOff();
     // ClimberSubsystem.getInstance().bothDown();
   }
 
@@ -128,10 +189,20 @@ public class RobotContainer
     }
   }
 
+  /**
+   * Get the command to run during autonomous.
+   * 
+   * @return The chosen command.
+   */
   public Command getAutonomousCommand()
   {
+    //Set the motors to brake mode and turn the manual brake on.
     DriveSubsystem.getInstance().motorsToBrake();
+    DriveSubsystem.getInstance().manualBrakeOn();
+    //Zero the IMU.
+    IMUSubsystem.getInstance().zeroYaw();
     //ClimberSubsystem.getInstance().bothDown();
+    //Return the selected command.
     return autoChooser.getSelected();
   }
 }

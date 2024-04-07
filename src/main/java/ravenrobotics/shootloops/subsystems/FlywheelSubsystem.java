@@ -11,11 +11,11 @@ import ravenrobotics.shootloops.Constants.MotorConstants;
 
 public class FlywheelSubsystem extends SubsystemBase 
 {
-    //Motors
+    //The flywheel motors.
     private final CANSparkMax topMotor = new CANSparkMax(FlywheelConstants.kTopFlyWheel, MotorType.kBrushless);
     private final CANSparkMax bottomMotor = new CANSparkMax(FlywheelConstants.kBottomFlyWheel, MotorType.kBrushless);
     
-    //Motor Encoders
+    //The encoders 
     private final RelativeEncoder topMotorEncoder = topMotor.getEncoder();
     private final RelativeEncoder bottomMotorEncoder = bottomMotor.getEncoder();
 
@@ -40,44 +40,77 @@ public class FlywheelSubsystem extends SubsystemBase
         return instance;
     }
 
+    /**
+     * Turn on the flywheels for shooting.
+     */
     public void shootOn() 
     {
         topMotor.set(-1);
         bottomMotor.set(-1);
     }
 
+    /**
+     * Stop the flywheels.
+     */
     public void stopFly()
     {
      topMotor.set(0);
      bottomMotor.set(0);
     }
 
-    public double getVelocity()
+    /**
+     * Get the total velocity of the flywheels.
+     * 
+     * @return The total velocity as a double.
+     */
+    public double getTotalVelocity()
     {
         return -(topMotorEncoder.getVelocity() + bottomMotorEncoder.getVelocity() / (double)2);
     }
 
-    @Override
-    public void periodic(){
+    /**
+     * Get the velocity of the top flywheel.
+     * 
+     * @return The velocity as a double.
+     */
+    public double getTopVelocity()
+    {
+        return -topMotorEncoder.getVelocity();
+    }
+
+    /**
+     * Get the velocity of the bottom flywheel.
+     * 
+     * @return The velocity as a double.
+     */
+    public double getBottomVelocity()
+    {
+        return -bottomMotorEncoder.getVelocity();
     }
 
     public void configMotors()
     {
+        //Restore the factory settings to the motors.
         topMotor.restoreFactoryDefaults();
         bottomMotor.restoreFactoryDefaults();
 
+        //Invert the motors.
         topMotor.setInverted(true);
         bottomMotor.setInverted(true);
 
+        //Set the idle mode to coast mode.
         topMotor.setIdleMode(IdleMode.kCoast);
         bottomMotor.setIdleMode(IdleMode.kCoast);
 
+        //Set the max current limit so that things don't break.
         topMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
+        //Reset the encoder position.
         topMotorEncoder.setPosition(0.0);
         bottomMotorEncoder.setPosition(0.0);
 
+        //Set the velocity conversion factor so that velocity readings are accurate.
         topMotorEncoder.setVelocityConversionFactor(3);
         bottomMotorEncoder.setVelocityConversionFactor(3);
 

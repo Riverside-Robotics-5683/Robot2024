@@ -8,11 +8,15 @@ import ravenrobotics.shootloops.subsystems.IMUSubsystem;
 
 public class LineUpWithSpeakerCommand extends Command
 {
+    //Declare the drive and IMU subsystems.
     private final DriveSubsystem driveSubsystem;
     private final IMUSubsystem imuSubsystem;
 
     private boolean isDone = false;
 
+    /**
+     * Command for manually lining up with the speaker during autonomous.
+     */
     public LineUpWithSpeakerCommand()
     {
         this.driveSubsystem = DriveSubsystem.getInstance();

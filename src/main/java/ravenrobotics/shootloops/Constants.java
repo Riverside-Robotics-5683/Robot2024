@@ -1,4 +1,5 @@
 package ravenrobotics.shootloops;
+package ravenrobotics.shootloops;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
@@ -12,9 +13,12 @@ public class Constants
         public static final int kDriverPort = 0;
         public static final int kSystemsPort = 1;
     }
+    //Constants for all the motors.
     public static class MotorConstants
     {
+        //The max motor stall limit.
         public static final int kAmpStallLimit = 40;
+        //The max motor limit for freely spinning.
         public static final int kAmpFreeLimit = 35;
     }
 
@@ -43,7 +47,7 @@ public class Constants
         /////////////////////
         ///Other Constants///
         /////////////////////
-        public static final double kDriveMaxSpeedMPS = Units.feetToMeters(13.87);
+        public static final double kDriveMaxSpeedMPS = Units.feetToMeters(6);
         //Slew rates.
         public static final double kTranslationSlewRate = 1.5;
         public static final double kRotationSlewRate = 1.0;
@@ -51,8 +55,7 @@ public class Constants
         //Encoder Constants//
         /////////////////////
         public static final double kWheelCircumference = Units.inchesToMeters(6) * Math.PI;
-        public static final double kDistanceConversionFactor = kWheelCircumference * (12.0 / 72);
-        public static final double kVelocityConversionFactor = 12.0 / 72;
+        public static final double kEncoderConversionFactor = kWheelCircumference * (12.0 / 72);
     }
     //Constants for the Pigeon2 IMU, such as the ID and various configuration settings.
     public static class IMUConstants
@@ -69,7 +72,7 @@ public class Constants
         //Mounting position in degrees.
         public static final double kMountPitch = -180.0;
         public static final double kMountRoll = 0.0;
-        public static final double kMountYaw = 0.0;
+        public static final double kMountYaw = -180.0;
         //Whether specific features should be enabled. (keep them to false)
         public static final boolean kDisableNoMotionCalibration = false;
         public static final boolean kDisableTemperatureCompensation = false;
@@ -85,8 +88,11 @@ public class Constants
         public static final double kArmI = 0.0;
         public static final double kArmD = 0.5;
         
-        public static final double kArmDeployedSetpoint = 58;
+        //Setpoints for the arm.
+        public static final double kArmDeployedSetpoint = 59;
+        public static final double kArmAmpSetpoint = 22.2;
 
+        //Roller feedforward values and various targets for the RPM and the laser-based distance sensor.
         public static final double kRollerFF = 1.0;
         public static final double kRollerSetpoint = 4000;
         public static final double kNoteInDistance = 6;
@@ -107,9 +113,11 @@ public class Constants
 
     public static class ClimberConstants
     {
+        //Motor IDs.
         public static final int kLeftClimber = 10;
         public static final int kRightClimber = 11;
 
+        //Motor inversions.
         public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = false;
     }
