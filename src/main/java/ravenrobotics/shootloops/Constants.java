@@ -12,9 +12,12 @@ public class Constants
         public static final int kDriverPort = 0;
         public static final int kSystemsPort = 1;
     }
+    //Constants for all the motors.
     public static class MotorConstants
     {
+        //The max motor stall limit.
         public static final int kAmpStallLimit = 40;
+        //The max motor limit for freely spinning.
         public static final int kAmpFreeLimit = 35;
     }
 
@@ -84,9 +87,11 @@ public class Constants
         public static final double kArmI = 0.0;
         public static final double kArmD = 0.5;
         
+        //Setpoints for the arm.
         public static final double kArmDeployedSetpoint = 59;
         public static final double kArmAmpSetpoint = 22.2;
 
+        //Roller feedforward values and various targets for the RPM and the laser-based distance sensor.
         public static final double kRollerFF = 1.0;
         public static final double kRollerSetpoint = 4000;
         public static final double kNoteInDistance = 6;
@@ -107,9 +112,11 @@ public class Constants
 
     public static class ClimberConstants
     {
+        //Motor IDs.
         public static final int kLeftClimber = 10;
         public static final int kRightClimber = 11;
 
+        //Motor inversions.
         public static final boolean kInvertLeftSide = true;
         public static final boolean kInvertRightSide = false;
     }

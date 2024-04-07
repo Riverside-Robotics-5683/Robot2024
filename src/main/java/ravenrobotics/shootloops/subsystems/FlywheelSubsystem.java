@@ -88,10 +88,6 @@ public class FlywheelSubsystem extends SubsystemBase
         return -bottomMotorEncoder.getVelocity();
     }
 
-    @Override
-    public void periodic(){
-    }
-
     public void configMotors()
     {
         //Restore the factory settings to the motors.

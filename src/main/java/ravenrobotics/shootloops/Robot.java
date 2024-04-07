@@ -20,9 +20,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() 
   {
+    //Setup the data log.
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
 
+    //Initialize the robot container.
     robotContainer = new RobotContainer();
   }
 
@@ -42,8 +44,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    //Get the auto command.
     autoCommand = robotContainer.getAutonomousCommand();
 
+    //Schedule the command if it exists.
     if (autoCommand != null) {
       autoCommand.schedule();
     }
@@ -57,9 +61,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    //Cancel the auto command if it's scheduled.
     if (autoCommand != null) {
       autoCommand.cancel();
     }
+    //Setup the robot for teleop.
     robotContainer.setupTeleop();
   }
 
@@ -87,6 +93,7 @@ public class Robot extends TimedRobot {
   @Override
   public void simulationPeriodic()
   {
+    //Run the REV physics simulation (broken, for sim).
     REVPhysicsSim.getInstance().run();
   }
 }

@@ -5,7 +5,9 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class Telemetry
 {
+    //The teleop tab as a Shuffleboard tab object.
     public static ShuffleboardTab teleopTab = Shuffleboard.getTab("TeleOp");
+    //The teleop tab name.
     public static String teleopTabString = "TeleOp";
 
     /**

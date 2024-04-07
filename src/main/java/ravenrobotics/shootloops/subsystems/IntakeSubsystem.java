@@ -37,12 +37,25 @@ public class IntakeSubsystem extends SubsystemBase
     private final GenericEntry armPositionEntry = Telemetry.teleopTab.add("Arm Position", 0).getEntry();
     private final GenericEntry sensorEntry = Telemetry.teleopTab.add("Note Sensor", false).getEntry();
 
+    //Instance object for simplifying access to the subsystem.
     private static IntakeSubsystem instance;
 
+    /**
+     * The different positions the intake can go to.
+     */
     public enum IntakeArmPosition
     {
+        /**
+         * Set the intake position to intaking.
+         */
         kIntake,
+        /**
+         * Set the intake position to amp scoring.
+         */
         kAmp,
+        /**
+         * Set the intake position to retracted for shooting.
+         */
         kRetracted
     }
 
@@ -83,20 +96,30 @@ public class IntakeSubsystem extends SubsystemBase
     {
         if (position == IntakeArmPosition.kIntake)
         {
+            //Set the RGB to the intake out pattern.
             RGBSubsystem.getInstance().setPattern(RGBValues.kIntakeOut);
+            //Set the PID controller to go to the setpoint for intaking.
             armPIDController.setReference(IntakeConstants.kArmDeployedSetpoint, ControlType.kPosition);
         }
         else if (position == IntakeArmPosition.kAmp)
         {
+            //Set the PID controller to go to the setpoint for amp scoring.
             armPIDController.setReference(IntakeConstants.kArmAmpSetpoint, ControlType.kPosition);
         }
         else if (position == IntakeArmPosition.kRetracted)
         {
+            //Set the RGB to the default pattern.
             RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
+            //Set the PID controller to go to the setpoint for being retracted.
             armPIDController.setReference(0, ControlType.kPosition);
         }
     }
 
+    /**
+     * Checks if the intake is moving.
+     * 
+     * @return Whether the intake is moving or not.
+     */
     public boolean waitForIntake()
     {
         boolean isReference = Math.abs(armMotorEncoder.getVelocity()) < 3;
@@ -104,38 +127,59 @@ public class IntakeSubsystem extends SubsystemBase
         return isReference;
     }
 
+    /**
+     * Runs the intake rollers to launch the note into the flywheel.
+     */
     public void runRollersFlywheel()
     {
-        //changed because rollers were super speedy
         rollerMotor.set(1);
     }
 
+    /**
+     * Runs the intake rollers to intake a note.
+     */
     public void runRollersIntake()
     {
         rollerMotor.set(-0.5);
     }
     
+    /**
+     * Runs the rollers to score a note into the amp.
+     */
     public void runRollersAmp()
     {
         rollerMotor.set(0.6);
     }
 
+    /**
+     * Runs the intake rollers slower.
+     */
     public void runRollersSlow()
     {
         rollerMotor.set(.5);
     }
 
+    /**
+     * Stops the intake rollers.
+     */
     public void stopRollers()
     {
         rollerMotor.stopMotor();
     }
 
+    /**
+     * Gets the current reading from the distance sensor.
+     * 
+     * @return Whether the distance sensor is detecting anything.
+     */
     public boolean getDistanceSensor()
     {
         boolean isDetected = distanceFilter.calculate(distanceSensor.get());
 
+        //Since the sensor returns true if it doesn't detect anything, return the opposite value (false).
         if(isDetected) return false;
 
+        //If the sensor does detect something, return true.
         return true;
     }
 
@@ -146,8 +190,9 @@ public class IntakeSubsystem extends SubsystemBase
         {
             //System.out.println("Arm Position: " + armMotorEncoder.getPosition());
         }
-        //Update arm motor's position on Shuffleboard.
+        //Update the arm motor's position on Shuffleboard.
         armPositionEntry.setDouble(armMotorEncoder.getPosition());
+        //Update the distance sensor 
         sensorEntry.setBoolean(getDistanceSensor());
     }
 
@@ -163,13 +208,16 @@ public class IntakeSubsystem extends SubsystemBase
         rollerMotor.setIdleMode(IdleMode.kCoast);
         armMotor.setIdleMode(IdleMode.kBrake);
 
+        //Set the current limits.
         rollerMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         armMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
+        //Set the ramp rate.
         armMotor.setClosedLoopRampRate(0.01);
+        //Set the feedback device for the PID controller.
         armPIDController.setFeedbackDevice(armMotorEncoder);
+        //Set the output range for the PID controller.
         armPIDController.setOutputRange(-0.5, 0.5);
-        armMotor.setClosedLoopRampRate(0.125);
 
         //Set the PID constants for the PID controller.
         armPIDController.setP(IntakeConstants.kArmP);
