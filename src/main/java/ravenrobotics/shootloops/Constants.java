@@ -1,5 +1,4 @@
 package ravenrobotics.shootloops;
-package ravenrobotics.shootloops;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;

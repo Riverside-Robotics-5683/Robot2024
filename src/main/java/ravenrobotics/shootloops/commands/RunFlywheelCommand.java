@@ -42,7 +42,7 @@ public class RunFlywheelCommand extends Command
         //Start the flywheels so that the note can be shot.
         flywheelSubsystem.shootOn();
         //Wait for the RPMs of the flywheels to reach the target velocity.
-        while (flywheelSubsystem.getBottomVelocity() < 8000 && flywheelSubsystem.getTopVelocity() < 8000)
+        while (flywheelSubsystem.getBottomVelocity() < 4500 && flywheelSubsystem.getTopVelocity() < 4500)
         {
             //System.out.println("Velocity:" + flywheelSubsystem.getVelocity());
             continue;

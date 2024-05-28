@@ -1,19 +1,20 @@
 package ravenrobotics.shootloops.subsystems;
 
-import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.FlywheelConstants;
 import ravenrobotics.shootloops.Constants.MotorConstants;
 
-public class FlywheelSubsystem extends SubsystemBase 
+public class FlywheelSubsystem extends SubsystemBase
 {
     //The flywheel motors.
-    private final CANSparkMax topMotor = new CANSparkMax(FlywheelConstants.kTopFlyWheel, MotorType.kBrushless);
-    private final CANSparkMax bottomMotor = new CANSparkMax(FlywheelConstants.kBottomFlyWheel, MotorType.kBrushless);
+    private final CANSparkFlex topMotor = new CANSparkFlex(FlywheelConstants.kTopFlyWheel, MotorType.kBrushless);
+    private final CANSparkFlex bottomMotor = new CANSparkFlex(FlywheelConstants.kBottomFlyWheel, MotorType.kBrushless);
     
     //The encoders 
     private final RelativeEncoder topMotorEncoder = topMotor.getEncoder();
@@ -40,13 +41,23 @@ public class FlywheelSubsystem extends SubsystemBase
         return instance;
     }
 
+    public FlywheelSubsystem() {
+        configMotors();
+    }
+
     /**
      * Turn on the flywheels for shooting.
      */
     public void shootOn() 
     {
-        topMotor.set(-1);
-        bottomMotor.set(-1);
+        topMotor.set(1);
+        bottomMotor.set(1);
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Top", getTopVelocity());
+        SmartDashboard.putNumber("Bottom", getTopVelocity());
     }
 
     /**
@@ -54,6 +65,7 @@ public class FlywheelSubsystem extends SubsystemBase
      */
     public void stopFly()
     {
+        System.out.println("Stopping motors.");
      topMotor.set(0);
      bottomMotor.set(0);
     }
@@ -75,7 +87,7 @@ public class FlywheelSubsystem extends SubsystemBase
      */
     public double getTopVelocity()
     {
-        return -topMotorEncoder.getVelocity();
+        return topMotorEncoder.getVelocity();
     }
 
     /**
@@ -85,7 +97,7 @@ public class FlywheelSubsystem extends SubsystemBase
      */
     public double getBottomVelocity()
     {
-        return -bottomMotorEncoder.getVelocity();
+        return bottomMotorEncoder.getVelocity();
     }
 
     public void configMotors()
@@ -96,7 +108,7 @@ public class FlywheelSubsystem extends SubsystemBase
 
         //Invert the motors.
         topMotor.setInverted(true);
-        bottomMotor.setInverted(true);
+        bottomMotor.setInverted(false);
 
         //Set the idle mode to coast mode.
         topMotor.setIdleMode(IdleMode.kCoast);
@@ -106,13 +118,12 @@ public class FlywheelSubsystem extends SubsystemBase
         topMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
         bottomMotor.setSmartCurrentLimit(MotorConstants.kAmpFreeLimit);
 
+        bottomMotorEncoder.setVelocityConversionFactor(3.0);
+        topMotorEncoder.setVelocityConversionFactor(3.0);
+
         //Reset the encoder position.
         topMotorEncoder.setPosition(0.0);
         bottomMotorEncoder.setPosition(0.0);
-
-        //Set the velocity conversion factor so that velocity readings are accurate.
-        topMotorEncoder.setVelocityConversionFactor(3);
-        bottomMotorEncoder.setVelocityConversionFactor(3);
 
         topMotor.burnFlash();
         bottomMotor.burnFlash();
