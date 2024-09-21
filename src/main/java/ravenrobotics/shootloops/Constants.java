@@ -1,11 +1,10 @@
 package ravenrobotics.shootloops;
-package ravenrobotics.shootloops;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
-public class Constants 
+public class Constants
 {
     //Constants for controller IDs, etc.
     public static class DriverStationConstants
@@ -87,7 +86,7 @@ public class Constants
         public static final double kArmP = 1.0;
         public static final double kArmI = 0.0;
         public static final double kArmD = 0.5;
-        
+
         //Setpoints for the arm.
         public static final double kArmDeployedSetpoint = 59;
         public static final double kArmAmpSetpoint = 22.2;
@@ -136,7 +135,7 @@ public class Constants
         //Actual kinematics object for performing calculations.
         public static final MecanumDriveKinematics kDriveKinematics = new MecanumDriveKinematics(
             kFrontLeftOffset,
-            kFrontRightOffset, 
+            kFrontRightOffset,
             kBackLeftOffset,
             kBackRightOffset);
     }

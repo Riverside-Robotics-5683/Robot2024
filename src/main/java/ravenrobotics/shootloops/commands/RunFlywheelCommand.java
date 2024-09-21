@@ -7,18 +7,17 @@ import ravenrobotics.shootloops.subsystems.DriveSubsystem;
 import ravenrobotics.shootloops.subsystems.FlywheelSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
 
-public class RunFlywheelCommand extends Command 
-{
+public class RunFlywheelCommand extends Command {
+
     //Declare the intake, flywheel, and drive subsystems.
     private final IntakeSubsystem intakeSubsystem;
     private final FlywheelSubsystem flywheelSubsystem;
     private final DriveSubsystem driveSubsystem;
-    
+
     /**
      * Command to run the flywheel to shoot a note into the speaker.
      */
-    public RunFlywheelCommand()
-    {
+    public RunFlywheelCommand() {
         //Get the instances of the intake, flywheel, and drive subsystems.
         this.intakeSubsystem = IntakeSubsystem.getInstance();
         this.flywheelSubsystem = FlywheelSubsystem.getInstance();
@@ -28,22 +27,18 @@ public class RunFlywheelCommand extends Command
     }
 
     @Override
-    public void initialize()
-    {
-        //Set the motors to brake mode so that the robot stops instaed of coasting.
-        driveSubsystem.motorsToBrake();
-    }
-
-    @Override
-    public void execute()
-    {
+    public void execute() {
+        //Set the motors to brake mode so the robot stays in place.
+        driveSubsystem.manualBrakeOn();
         //Set the drive subsystem to not be driving, so the shot can be stabilized.
         driveSubsystem.drive(new ChassisSpeeds(0, 0, 0));
         //Start the flywheels so that the note can be shot.
         flywheelSubsystem.shootOn();
         //Wait for the RPMs of the flywheels to reach the target velocity.
-        while (flywheelSubsystem.getBottomVelocity() < 8000 && flywheelSubsystem.getTopVelocity() < 8000)
-        {
+        while (
+            flywheelSubsystem.getBottomVelocity() < 7500 &&
+            flywheelSubsystem.getTopVelocity() < 7500
+        ) {
             //System.out.println("Velocity:" + flywheelSubsystem.getVelocity());
             continue;
         }
@@ -54,11 +49,10 @@ public class RunFlywheelCommand extends Command
     }
 
     @Override
-    public void end(boolean interrupted)
-    {
+    public void end(boolean interrupted) {
         //Stop the flywheels, stop the rollers, and set the motors back to coast mode.
         flywheelSubsystem.stopFly();
         intakeSubsystem.stopRollers();
-        driveSubsystem.motorsToCoast();
+        driveSubsystem.manualBrakeOff();
     }
 }

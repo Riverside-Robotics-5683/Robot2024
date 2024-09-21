@@ -45,8 +45,8 @@ public class FlywheelSubsystem extends SubsystemBase
      */
     public void shootOn() 
     {
-        topMotor.set(-1);
-        bottomMotor.set(-1);
+        topMotor.set(1);
+        bottomMotor.set(1);
     }
 
     /**
@@ -75,7 +75,7 @@ public class FlywheelSubsystem extends SubsystemBase
      */
     public double getTopVelocity()
     {
-        return -topMotorEncoder.getVelocity();
+        return Math.abs(topMotorEncoder.getVelocity());
     }
 
     /**
@@ -85,7 +85,7 @@ public class FlywheelSubsystem extends SubsystemBase
      */
     public double getBottomVelocity()
     {
-        return -bottomMotorEncoder.getVelocity();
+        return Math.abs(bottomMotorEncoder.getVelocity());
     }
 
     public void configMotors()
@@ -111,8 +111,8 @@ public class FlywheelSubsystem extends SubsystemBase
         bottomMotorEncoder.setPosition(0.0);
 
         //Set the velocity conversion factor so that velocity readings are accurate.
-        topMotorEncoder.setVelocityConversionFactor(3);
-        bottomMotorEncoder.setVelocityConversionFactor(3);
+        topMotorEncoder.setVelocityConversionFactor(1);
+        bottomMotorEncoder.setVelocityConversionFactor(1);
 
         topMotor.burnFlash();
         bottomMotor.burnFlash();

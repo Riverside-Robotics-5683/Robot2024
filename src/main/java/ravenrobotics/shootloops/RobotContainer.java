@@ -40,7 +40,7 @@ public class RobotContainer
 
   //Whether to drive field relative or not.
   public boolean isFieldRelative = true;
-  private GenericEntry isFieldRelativeEntry = Telemetry.teleopTab.add("Field Relative", false).getEntry();
+  private final GenericEntry isFieldRelativeEntry = Telemetry.teleopTab.add("Field Relative", false).getEntry();
 
   //The commands for running the flywheel and automatically intaking.
   private final RunFlywheelCommand flywheelCommand = new RunFlywheelCommand();
@@ -61,16 +61,9 @@ public class RobotContainer
   );
 
   //Chooser on the dashboard for autos.
-  private final SendableChooser<Command> autoChooser;
+  //private final SendableChooser<Command> autoChooser;
 
-  //Main drive command.
-  private final DriveCommand driveCommand = new DriveCommand(
-    () -> -driverController.getLeftY(),
-    () -> -driverController.getLeftX(),
-    () -> -driverController.getRightX(),
-    () -> isFieldRelative);
-
-  /**
+    /**
    * The container for setting everything driver- and auto-related.
    */
   public RobotContainer()
@@ -97,27 +90,33 @@ public class RobotContainer
     RGBSubsystem.getInstance().setPattern(RGBValues.kDefault);
 
     //Initialize the auto chooser with all of the PathPlanner autos.
-    autoChooser = AutoBuilder.buildAutoChooser();
+    //autoChooser = AutoBuilder.buildAutoChooser();
 
     //Add the autos created outside of PathPlanner.
-    autoChooser.addOption("Drive Forward", new DriveForwardAuto());
-    autoChooser.addOption("1 Note Drive Out Right", driveOutAutoRight);
-    autoChooser.addOption("1 Note Drive Out Left", driveOutAutoLeft);
-    autoChooser.addOption("Shoot No Mobility", new AutoShootCommand());
-
-    //Send the chooser to the dashboard.
-    Telemetry.teleopTab.add("Auto Chooser", autoChooser);
+//    autoChooser.addOption("Drive Forward", new DriveForwardAuto());
+//    autoChooser.addOption("1 Note Drive Out Right", driveOutAutoRight);
+//    autoChooser.addOption("1 Note Drive Out Left", driveOutAutoLeft);
+//    autoChooser.addOption("Shoot No Mobility", new AutoShootCommand());
+//
+//    //Send the chooser to the dashboard.
+//    Telemetry.teleopTab.add("Auto Chooser", autoChooser);
 
     //Configure configured controller bindings.
     configureBindings();
     //Set the default command for the drive subsystem to the drive command.
-    DriveSubsystem.getInstance().setDefaultCommand(driveCommand);
+    //Main drive command.
+    DriveCommand driveCommand = new DriveCommand(
+              () -> -driverController.getLeftY(),
+              () -> -driverController.getLeftX(),
+              () -> -driverController.getRightX(),
+              () -> isFieldRelative);
+      DriveSubsystem.getInstance().setDefaultCommand(driveCommand);
   }
 
   private void configureBindings()
   {
     //Set the buttons on the driver controller for field-relative and zeroing the heading.
-    driverController.back().onTrue(new InstantCommand(() -> toggleFieldRelative()));
+    driverController.back().onTrue(new InstantCommand(this::toggleFieldRelative));
     driverController.start().onTrue(new InstantCommand(() -> IMUSubsystem.getInstance().zeroYaw()));
 
     //Set the ABXY array on the driver controller for switching the center of rotation.
@@ -133,7 +132,7 @@ public class RobotContainer
 
     //Set the X and B buttons on the systems controller to automatically run the intake and then manually retract it.
     systemsController.x().onTrue(intakeCommand);
-    systemsController.b().onTrue(new InstantCommand(() -> intakeCommand.cancel()));
+    systemsController.b().onTrue(new InstantCommand(intakeCommand::cancel));
 
     //Set the left trigger on the systemst controller to manually run the rollers for intaking.
     systemsController.leftTrigger().onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().runRollersIntake()));
@@ -153,7 +152,7 @@ public class RobotContainer
 
     //Set the right trigger on the systems controller to run the flywheel for shooting a note.
     systemsController.rightTrigger().onTrue(flywheelCommand);
-    systemsController.rightTrigger().onFalse(new InstantCommand(() -> flywheelCommand.cancel()));
+    systemsController.rightTrigger().onFalse(new InstantCommand(flywheelCommand::cancel));
 
     //Set the POV hat on the systems controller to set the intake to the amp position when pressed in the up direction, and to move back to the retracted position when pressed down.
     systemsController.pov(0).onTrue(new InstantCommand(() -> IntakeSubsystem.getInstance().setIntakePosition(IntakeArmPosition.kAmp)));
@@ -176,7 +175,7 @@ public class RobotContainer
 
   private void toggleFieldRelative()
   {
-    //Toggle field relative (if true set false, if false set true)
+    //Toggle field relative (if true set false, if false, set true)
     if (isFieldRelative)
     {
       isFieldRelative = false;
@@ -203,6 +202,7 @@ public class RobotContainer
     IMUSubsystem.getInstance().zeroYaw();
     //ClimberSubsystem.getInstance().bothDown();
     //Return the selected command.
-    return autoChooser.getSelected();
+    //return autoChooser.getSelected();
+    return null;
   }
 }
