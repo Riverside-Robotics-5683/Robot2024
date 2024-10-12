@@ -4,32 +4,38 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
-
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import ravenrobotics.shootloops.Constants.ClimberConstants;
 import ravenrobotics.shootloops.util.Telemetry;
 
-public class ClimberSubsystem extends SubsystemBase 
-{
+public class ClimberSubsystem extends SubsystemBase {
+
     //Declare the climber motor controllers.
-    private final TalonSRX leftClimber = new TalonSRX(ClimberConstants.kLeftClimber);
-    private final TalonSRX rightClimber = new TalonSRX(ClimberConstants.kRightClimber);
+    private final TalonSRX leftClimber = new TalonSRX(
+        ClimberConstants.kLeftClimber
+    );
+    private final TalonSRX rightClimber = new TalonSRX(
+        ClimberConstants.kRightClimber
+    );
 
     //Declare the limit switches.
     private final DigitalInput leftLimitSwitch = new DigitalInput(1);
     private final DigitalInput rightLimitSwitch = new DigitalInput(2);
 
     //Declare the Shuffleboard entries for the limit switches.
-    private final GenericEntry leftClimberLimit = Telemetry.teleopTab.add("Left Limit Switch", false).getEntry();
-    private final GenericEntry rightClimberLimit = Telemetry.teleopTab.add("Right Limit Switch", false).getEntry();
+    private final GenericEntry leftClimberLimit = Telemetry.teleopTab
+        .add("Left Limit Switch", false)
+        .getEntry();
+    private final GenericEntry rightClimberLimit = Telemetry.teleopTab
+        .add("Right Limit Switch", false)
+        .getEntry();
 
     /**
      * The different directions the climber can go.
      */
-    public enum ClimberDirection
-    {
+    public enum ClimberDirection {
         /**
          * Move the climber up.
          */
@@ -37,7 +43,7 @@ public class ClimberSubsystem extends SubsystemBase
         /**
          * Move the climber down.
          */
-        kDown
+        kDown,
     }
 
     //The static instance for other classes to access.
@@ -45,62 +51,75 @@ public class ClimberSubsystem extends SubsystemBase
 
     /**
      * Returns the active instance of the ClimberSubsystem.
-     * 
+     *
      * @return The active ClimberSubsystem instance.
      */
-    public static ClimberSubsystem getInstance()
-    {
+    public static ClimberSubsystem getInstance() {
         //If the instance doesn't exist yet, create a new one.
-        if (instance == null)
-        {
+        if (instance == null) {
             instance = new ClimberSubsystem();
         }
         //Return the instance.
         return instance;
     }
 
-    private ClimberSubsystem()
-    {
+    private ClimberSubsystem() {
         configMotors();
     }
 
     /**
      * Moves the left climber.
-     * 
+     *
      * @param direction The direction to move the climber.
      */
-    public void moveLeft(ClimberDirection direction)
-    {
-        switch (direction)
-        {
+    public void moveLeft(ClimberDirection direction) {
+        FlywheelSubsystem.getInstance().disableIdle();
+        switch (direction) {
             //If commanded to move up, set the climber output to move up.
-            case kUp -> leftClimber.set(ControlMode.PercentOutput, -.75);
+            case kUp:
+                leftClimber.set(ControlMode.PercentOutput, -.75);
+                break;
             //If commanded to move down, set the climber to move down if the limit switch isn't engaged.
-            case kDown -> {if (!leftLimitSwitch.get()) {leftClimber.set(ControlMode.PercentOutput, 0); return;} leftClimber.set(ControlMode.PercentOutput, .75);}
+            case kDown:
+                if (!leftLimitSwitch.get()) {
+                    leftClimber.set(ControlMode.PercentOutput, 0);
+                    break;
+                } else {
+                    leftClimber.set(ControlMode.PercentOutput, .75);
+                }
+                break;
         }
     }
 
     /**
      * Moves the right climber.
-     * 
+     *
      * @param direction The direction to move the climber.
      */
-    public void moveRight(ClimberDirection direction)
-    {
-        switch (direction)
-        {
+    public void moveRight(ClimberDirection direction) {
+        FlywheelSubsystem.getInstance().disableIdle();
+        switch (direction) {
             //If commanded to move up, set the climber output to move up.
-            case kUp -> rightClimber.set(ControlMode.PercentOutput, .75);
+            case kUp:
+                rightClimber.set(ControlMode.PercentOutput, .75);
+                break;
             //If commanded to move down, set the climber to move down if the limit switch isn't engaged.
-            case kDown -> {if (!rightLimitSwitch.get()) {rightClimber.set(ControlMode.PercentOutput, 0); return;} rightClimber.set(ControlMode.PercentOutput, -.75);}
+            case kDown:
+                if (!rightLimitSwitch.get()) {
+                    rightClimber.set(ControlMode.PercentOutput, 0);
+                    break;
+                } else {
+                    rightClimber.set(ControlMode.PercentOutput, -.75);
+                }
+                break;
         }
     }
 
     /**
      * Moves both climbers up.
      */
-    public void bothUp()
-    {
+    public void bothUp() {
+        FlywheelSubsystem.getInstance().disableIdle();
         moveLeft(ClimberDirection.kUp);
         moveRight(ClimberDirection.kUp);
     }
@@ -108,8 +127,8 @@ public class ClimberSubsystem extends SubsystemBase
     /**
      * Moves both climbers down.
      */
-    public void bothDown()
-    {
+    public void bothDown() {
+        FlywheelSubsystem.getInstance().disableIdle();
         moveLeft(ClimberDirection.kDown);
         moveRight(ClimberDirection.kDown);
     }
@@ -117,8 +136,7 @@ public class ClimberSubsystem extends SubsystemBase
     /**
      * Immediately stops both motors.
      */
-    public void stopMotors()
-    {
+    public void stopMotors() {
         leftClimber.set(ControlMode.PercentOutput, 0);
         rightClimber.set(ControlMode.PercentOutput, 0);
     }
@@ -126,8 +144,7 @@ public class ClimberSubsystem extends SubsystemBase
     /**
      * Sets the climber motors to brake mode.
      */
-    public void toBrake()
-    {
+    public void toBrake() {
         leftClimber.setNeutralMode(NeutralMode.Brake);
         rightClimber.setNeutralMode(NeutralMode.Brake);
     }
@@ -135,21 +152,18 @@ public class ClimberSubsystem extends SubsystemBase
     /**
      * Sets the climber motors to coast mode.
      */
-    public void toCoast()
-    {
+    public void toCoast() {
         leftClimber.setNeutralMode(NeutralMode.Coast);
         rightClimber.setNeutralMode(NeutralMode.Coast);
     }
 
     @Override
-    public void periodic()
-    {
+    public void periodic() {
         leftClimberLimit.setBoolean(!leftLimitSwitch.get());
         rightClimberLimit.setBoolean(!rightLimitSwitch.get());
     }
 
-    private void configMotors()
-    {
+    private void configMotors() {
         //Create a new motor config.
         TalonSRXConfiguration motorConfig = new TalonSRXConfiguration();
 

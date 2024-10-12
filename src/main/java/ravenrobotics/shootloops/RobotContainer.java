@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import ravenrobotics.shootloops.Constants.DriverStationConstants;
 import ravenrobotics.shootloops.Constants.KinematicsConstants;
 import ravenrobotics.shootloops.commands.DriveCommand;
@@ -24,6 +25,7 @@ import ravenrobotics.shootloops.commands.autos.ppcommands.*;
 import ravenrobotics.shootloops.subsystems.ClimberSubsystem;
 import ravenrobotics.shootloops.subsystems.ClimberSubsystem.ClimberDirection;
 import ravenrobotics.shootloops.subsystems.DriveSubsystem;
+import ravenrobotics.shootloops.subsystems.FlywheelSubsystem;
 import ravenrobotics.shootloops.subsystems.IMUSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem;
 import ravenrobotics.shootloops.subsystems.IntakeSubsystem.IntakeArmPosition;
@@ -42,7 +44,7 @@ public class RobotContainer {
     //Whether to drive field relative or not.
     public boolean isFieldRelative = true;
     private final GenericEntry isFieldRelativeEntry = Telemetry.teleopTab
-        .add("Field Relative", false)
+        .add("Field Relative", true)
         .getEntry();
 
     //The commands for running the flywheel and automatically intaking.
@@ -50,28 +52,10 @@ public class RobotContainer {
     private final IntakeRoutineCommand intakeCommand =
         new IntakeRoutineCommand();
 
-    //Auto for shooting then driving right.
-    private final SequentialCommandGroup driveOutAutoRight =
-        new SequentialCommandGroup(
-            new InstantCommand(() ->
-                IMUSubsystem.getInstance().setYawToRightSubwoofer()
-            ),
-            new AutoShootCommand(),
-            new DriveForCommand(0.5, 0.05, 3)
-        );
-
-    //Auto for shooting then driving left.
-    private final SequentialCommandGroup driveOutAutoLeft =
-        new SequentialCommandGroup(
-            new InstantCommand(() ->
-                IMUSubsystem.getInstance().setYawToLeftSubwoofer()
-            ),
-            new AutoShootCommand(),
-            new DriveForCommand(0.5, -0.05, 3)
-        );
-
     //Chooser on the dashboard for autos.
     private final SendableChooser<Command> autoChooser;
+
+    private final SendableChooser<Command> sysIdChooser;
 
     /**
      * The container for setting everything driver- and auto-related.
@@ -123,14 +107,28 @@ public class RobotContainer {
         //Initialize the auto chooser with all of the PathPlanner autos.
         autoChooser = AutoBuilder.buildAutoChooser();
 
-        //Add the autos created outside of PathPlanner.
-        autoChooser.addOption("Drive Forward", new DriveForwardAuto());
-        autoChooser.addOption("1 Note Drive Out Right", driveOutAutoRight);
-        autoChooser.addOption("1 Note Drive Out Left", driveOutAutoLeft);
-        autoChooser.addOption("Shoot No Mobility", new AutoShootCommand());
+        sysIdChooser = new SendableChooser<Command>();
+
+        sysIdChooser.setDefaultOption(
+            "Quasi Forward",
+            FlywheelSubsystem.getInstance().sysIdQuasistatic(Direction.kForward)
+        );
+        sysIdChooser.addOption(
+            "Quasi Backward",
+            FlywheelSubsystem.getInstance().sysIdQuasistatic(Direction.kReverse)
+        );
+        sysIdChooser.addOption(
+            "Dynamic Forward",
+            FlywheelSubsystem.getInstance().sysIdDynamic(Direction.kForward)
+        );
+        sysIdChooser.addOption(
+            "Dynamic Backward",
+            FlywheelSubsystem.getInstance().sysIdDynamic(Direction.kReverse)
+        );
 
         //Send the chooser to the dashboard.
         Telemetry.teleopTab.add("Auto Chooser", autoChooser);
+        Telemetry.teleopTab.add("SysID", sysIdChooser);
 
         //Configure configured controller bindings.
         configureBindings();
@@ -371,13 +369,14 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         //Set the motors to brake mode and turn the manual brake on.
-        DriveSubsystem.getInstance().motorsToBrake();
-        DriveSubsystem.getInstance().manualBrakeOn();
-        //Zero the IMU.
-        IMUSubsystem.getInstance().zeroYaw();
-        //ClimberSubsystem.getInstance().bothDown();
-        //Return the selected command.
-        //return autoChooser.getSelected();
-        return null;
+        // DriveSubsystem.getInstance().motorsToBrake();
+        // DriveSubsystem.getInstance().manualBrakeOn();
+        // //Zero the IMU.
+        // IMUSubsystem.getInstance().zeroYaw();
+        // //ClimberSubsystem.getInstance().bothDown();
+        // //Return the selected command.
+        // return autoChooser.getSelected();
+        FlywheelSubsystem.getInstance().disableIdle();
+        return sysIdChooser.getSelected();
     }
 }

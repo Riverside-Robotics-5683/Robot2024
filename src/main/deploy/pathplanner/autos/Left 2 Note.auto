@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.7401886415755699,
-      "y": 6.710309340732804
+      "x": 0.74,
+      "y": 6.71
     },
     "rotation": 59.69721494940297
   },
@@ -33,7 +33,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left to Note 2"
+            "pathName": "Left to Note 1"
           }
         },
         {
